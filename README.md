@@ -1,6 +1,6 @@
 # TIL90 Reverse Engineering
 
-Last updated: 2026-07-15
+Last updated: 2026-07-19
 
 This repository documents a safety-first reverse engineering effort for a Worldsensing Loadsensing TIL90 sensor. Static analysis, direct Linux reads, monitoring, history, guarded configuration, gateway credentials, factory-reset recovery, and firmware 2.81 reinstallation are implemented. Calibration and node-ID writes remain blocked.
 
@@ -19,6 +19,28 @@ This repository documents a safety-first reverse engineering effort for a Worlds
 - The physical node passed an exact-image firmware 2.81 reflash, factory reset, complete backup-driven restoration with new gateway credentials, reboot, and a final zero-difference configuration comparison.
 
 Start with `docs/README.md`. The first hardware evidence is under `captures/reference_sessions/2026-07-15T103257Z/`; the post-gateway-configuration comparison is under `captures/reference_sessions/2026-07-15T161221Z-post-gateway-config/`.
+
+## Measurement axes and operating principle
+
+The physical `LS-G6-TIL90-I` reports three enabled angular channels: X, Y, and Z. A hardware-captured live response returned X `-2.4473°`, Y `2.8581°`, and Z `86.2360°` at `27.8 °C`. All three channels are enabled on the tested node. A controlled configuration trial temporarily disabled Z, produced an X/Y-only live result, and then restored all three axes with a zero-difference configuration comparison.
+
+The three reported angles describe the direction of the same gravity vector in the sensor's body coordinate system. For a stationary sensor, the measured acceleration components satisfy approximately:
+
+```text
+sqrt(ax^2 + ay^2 + az^2) = g
+```
+
+An individual axis angle can be represented conceptually as `theta_i = asin(ai / g)`, followed by the stored offset and gain calibration for that axis. The node exposes separate X/Y/Z offset and gain coefficients. When the sensor lies approximately level with Z pointing upward, X and Y are near `0°` and Z is near `+90°`; turning it onto a side moves the corresponding horizontal axis toward `+90°` or `-90°`.
+
+Although the payload contains three angle values, gravity supplies only two independent tilt degrees of freedom. The channels are geometrically related and, under stationary ideal conditions, approximately satisfy:
+
+```text
+sin(theta_x)^2 + sin(theta_y)^2 + sin(theta_z)^2 = 1
+```
+
+The sensor can therefore describe inclination in three body-axis channels and can be used to derive pitch and roll with a documented mounting convention. It cannot independently determine rotation about the gravity vector (yaw or compass heading). The protocol supports an optional nine-bit `azimuth` field in version-1 regular readings, but the tested firmware `2.81` uses the version-0 reading format and has not produced a hardware-confirmed azimuth.
+
+Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` and is accompanied by a standard-deviation value. The message also carries temperature, timestamp, precision mode, and an error code. The `0.0001°` protocol increment is an encoding resolution, not a demonstrated absolute accuracy. Axis sign, mounting orientation, linearity, repeatability, and temperature effects still require validation against a traceable angular reference fixture before metrology claims are made.
 
 ## Repository map
 
