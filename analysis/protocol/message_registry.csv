@@ -1,0 +1,61 @@
+am_type_dec,am_type_hex,response_class,smali_class,purpose,til90_relevance,confidence
+0,0x00,C8913o0,o7/o0,command response acknowledgement or stream terminator,read and write control,confirmed
+1,0x01,C8911n0,o7/n0,historical recovered-message wrapper,historical read-only,confirmed
+2,0x02,C8926u,o7/u,stored-data oldest and newest timestamp interval,historical read-only,confirmed
+3,0x03,C8924t,o7/t,node information response,read-only,confirmed
+5,0x05,C8910n,o7/n,extended node information and hardware version,read-only,confirmed
+6,0x06,C8833E,o7/E,LoRa session response,read-only configuration,confirmed
+7,0x07,C8902k,o7/k,digital custom-command response,none,confirmed
+8,0x08,C8832D,o7/D,LoRa link-check response,diagnostic,confirmed
+9,0x09,C8924t,o7/t,node information response alternate AM type,read-only,confirmed
+21,0x15,C8836G,o7/G,miscellaneous command state including Bluetooth driver state,diagnostic,confirmed
+64,0x40,C8912o,o7/o,node health response,read-only,confirmed
+65,0x41,C8901j0,o7/j0,VW reading,none,confirmed
+67,0x43,C8907l0,o7/l0,voltage reading,none,confirmed
+68,0x44,C8859S.C8860a,o7/S$a,digital reading or reading fragment,none,confirmed
+69,0x45,C8875Z,o7/Z,INC15 reading,none,confirmed
+70,0x46,C8912o,o7/o,node health response alternate AM type,read-only,confirmed
+71,0x47,C8894g0,o7/g0,Pico reading,none,confirmed
+72,0x48,C8896h0.C8897a,o7/h0$a,SIPI reading or reading fragment,none,confirmed
+73,0x49,C8883c0,o7/c0,laser reading,related inclinometer family,confirmed
+74,0x4A,C8921r0,o7/r0,VW magnitude data,none,confirmed
+75,0x4B,C8850N.C8852b,o7/N$b,digital GMM reading or fragment,none,confirmed
+76,0x4C,C8880b0,o7/b0,INC360 or TIL90 axis reading,TIL90 live reading,confirmed
+78,0x4E,C8886d0,o7/d0,Laser TIL90 combined tilt and laser reading,related inclinometer family,confirmed
+79,0x4F,C8912o,o7/o,node health response alternate AM type,read-only,confirmed
+80,0x50,C8877a0,o7/a0,INC360 Alarm or TIL90 alarm reading,TIL90 live reading,confirmed
+82,0x52,C9479d.C9480a,s7/d$a,dynamic-node fragmented reading,none,confirmed
+83,0x53,C9694f,t7/f,dynamic-node reading,none,confirmed
+84,0x54,C10471a,y7/a,GNSS diagnostic reading,none,confirmed
+85,0x55,C10206a,w7/a,GNSS averaged position reading,none,confirmed
+86,0x56,C9403d.C9404a,r7/d$a,dynamic-node event fragment,none,confirmed
+87,0x57,C9956a,v7/a,GNSS raw-data reading,none,confirmed
+88,0x58,C8899i0,o7/i0,G7 VW reading,none,confirmed
+89,0x59,C10595b,z7/b,product-specific command response,possible generation detection,confirmed
+90,0x5A,C10345a,x7/a,GNSS rough-position reading,none,confirmed
+128,0x80,C8918q0,o7/q0,VW channel configuration,none,confirmed
+130,0x82,C8916p0,o7/p0,sampling-rate configuration,TIL90 read-only configuration,confirmed
+131,0x83,C8930w,o7/w,LoRa address configuration,TIL90 read-only configuration,confirmed
+132,0x84,C8829A,o7/A,LoRa general configuration,TIL90 read-only configuration,confirmed
+133,0x85,C8931x,o7/x,LoRa channel-group-0 configuration,TIL90 read-only configuration,confirmed
+141,0x8D,C8831C,o7/C,LoRa network ID configuration,TIL90 read-only configuration,confirmed
+142,0x8E,C8933z,o7/z,LoRa downlink channels configuration,TIL90 read-only configuration,confirmed
+143,0x8F,C8891f,o7/f,analog configuration,none,confirmed
+144,0x90,C8835F,o7/F,LoRa slot-time configuration,TIL90 read-only configuration,confirmed
+145,0x91,C8898i,o7/i,digital configuration,none,confirmed
+146,0x92,C8915p,o7/p,INC calibration configuration,none,confirmed
+147,0x93,C8839H,o7/H,Pico configuration,none,confirmed
+148,0x94,C8830B,o7/B,LoRa join configuration,TIL90 read-only configuration,confirmed
+149,0x95,C8908m,o7/m,digital power-supply threshold configuration,none,confirmed
+150,0x96,C8923s0,o7/s0,VW threshold configuration,none,confirmed
+151,0x97,C8906l,o7/l,digital GMM instructions configuration,none,confirmed
+152,0x98,C8919r,o7/r,INC360 or TIL90 calibration parameters,TIL90 read-only calibration,confirmed
+153,0x99,C8928v,o7/v,Laser TIL90 channel configuration,related inclinometer family,confirmed
+154,0x9A,C8922s,o7/s,INC360 channel configuration,related inclinometer family,confirmed
+155,0x9B,C8917q,o7/q,INC360 Alarm or TIL90 channel and alarm configuration,TIL90 read-only configuration,confirmed
+158,0x9E,C9170j,q7/j,dynamic-node configuration,none,confirmed
+159,0x9F,C9799b,u7/b,GNSS configuration,none,confirmed
+161,0xA1,C9798a,u7/a,GNSS base-position configuration,none,confirmed
+162,0xA2,C9802d,u7/d,GNSS correction keys configuration,none,confirmed
+163,0xA3,C9800c,u7/c,GNSS correction-channel configuration,none,confirmed
+165,0xA5,C9026a,p7/a,Bluetooth configuration,TIL90 read-only configuration,confirmed

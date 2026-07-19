@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TIL90 Field Desk — Sensor Console</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/monitoring.css">
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">LOCAL · USB · NO CLOUD</span><h1>TIL90 Field Desk</h1></div>
+    <div class="header-status"><span id="mode" class="pill pending">Checking mode…</span><span id="connection" class="pill pending">Finding sensor…</span></div>
+  </header>
+
+  <main>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="measurements">Measurements</button>
+      <button class="tab" data-tab="monitoring">Monitoring &amp; alerts</button>
+      <button class="tab" data-tab="configuration">Configuration</button>
+      <button class="tab" data-tab="radio">Radio &amp; gateway</button>
+      <button class="tab" data-tab="history">History</button>
+      <button class="tab" data-tab="backup">Backup</button>
+      <button class="tab" data-tab="maintenance">Maintenance</button>
+    </nav>
+
+    <section id="tab-overview" class="tab-page active">
+      <article class="hero panel">
+        <div><p class="kicker">DEVICE STATUS</p><h2>Everything important, without raw JSON</h2>
+          <p class="muted">The console reads the sensor directly through Linux. Technical TX/RX bytes remain available separately, while normal values are presented as readable cards.</p></div>
+        <div class="actions"><button id="refresh-all" class="primary">Refresh all</button><button data-read="health">Check connection</button></div>
+      </article>
+      <section class="metrics" aria-label="Device summary">
+        <article class="metric"><span>Node ID</span><strong id="node">—</strong><small id="serial">Serial: —</small></article>
+        <article class="metric"><span>Model</span><strong id="model">—</strong><small id="product">Product: —</small></article>
+        <article class="metric"><span>Firmware</span><strong id="firmware">—</strong><small id="uptime">Uptime: —</small></article>
+        <article class="metric"><span>Power</span><strong id="battery">—</strong><small id="temperature">Temperature: —</small></article>
+        <article class="metric"><span>Radio</span><strong id="radio-state">—</strong><small id="radio-summary">—</small></article>
+        <article class="metric"><span>Measurements</span><strong id="sampling-summary">—</strong><small id="slot-summary">Gateway slot: —</small></article>
+      </section>
+      <div class="grid">
+        <article class="panel"><p class="kicker">LATEST MEASUREMENT</p><h2>Tilt</h2><div id="overview-reading" class="axis-cards empty">Select “Take measurement”</div><button data-read="live" class="primary">Take measurement</button></article>
+        <article class="panel"><p class="kicker">READ RESULTS</p><h2>Summary</h2><div id="readable-results" class="readable-results empty">No data has been read yet.</div></article>
+      </div>
+    </section>
+
+    <section id="tab-measurements" class="tab-page">
+      <article class="panel chart-panel">
+        <div class="section-head"><div><p class="kicker">LIVE USB</p><h2>X / Y / Z chart</h2><p class="muted">One acquisition takes about 10 seconds. The next request starts only after the previous one completes.</p></div>
+          <div class="actions"><button id="live-once" class="primary">Take once</button><button id="live-start">Continuous</button><button id="live-stop" disabled>Stop</button></div></div>
+        <canvas id="chart" width="1000" height="340" aria-label="Tilt chart"></canvas>
+        <div id="latest" class="legend">No measurements</div>
+        <div id="sample-table" class="table-wrap empty">The table will appear after the first measurement.</div>
+      </article>
+    </section>
+
+    <section id="tab-configuration" class="tab-page">
+      <div class="grid config-grid">
+        <article class="panel">
+          <div class="section-head"><div><p class="kicker">CURRENT PARAMETERS</p><h2>Sensor configuration</h2></div><button id="config-load">Read</button></div>
+          <form id="config-form">
+            <label for="sampling-seconds">Measurement interval</label>
+            <div class="field-row"><input id="sampling-seconds" type="number" min="1" max="16777215" required><select id="sampling-preset" aria-label="Measurement interval preset"><option value="">Choose a preset…</option><option value="60">1 minute</option><option value="300">5 minutes</option><option value="600">10 minutes</option><option value="900">15 minutes</option><option value="1800">30 minutes</option><option value="3600">1 hour</option><option value="7200">2 hours</option><option value="21600">6 hours</option><option value="43200">12 hours</option><option value="86400">24 hours</option></select></div>
+            <p class="hint">How often the sensor performs and stores a normal measurement.</p>
+
+            <label for="gateway-slot-seconds">Radio slot / gateway transmission timing</label>
+            <div class="field-row"><input id="gateway-slot-seconds" type="number" min="1" max="65535" required><select id="slot-preset" aria-label="Gateway slot preset"><option value="">Choose a preset…</option><option value="300">5 minutes</option><option value="600">10 minutes</option><option value="900">15 minutes</option><option value="1800">30 minutes</option><option value="3000">50 minutes</option><option value="3600">1 hour</option><option value="7200">2 hours</option><option value="21600">6 hours</option><option value="43200">12 hours</option></select></div>
+            <p class="hint warning">This is a separate radio slot used to distribute transmissions across the network. It does not replace the measurement interval and must match the gateway plan.</p>
+
+            <fieldset><legend>Enabled axes</legend><label class="check"><input id="axis-x" type="checkbox"> X</label><label class="check"><input id="axis-y" type="checkbox"> Y</label><label class="check"><input id="axis-z" type="checkbox"> Z</label></fieldset>
+            <div class="actions"><button id="config-preview" type="submit" class="primary">Preview changes</button><button id="config-reset" type="button">Restore read values</button></div>
+          </form>
+        </article>
+        <article class="panel"><p class="kicker">SAFE APPLICATION</p><h2>Change plan</h2><div id="config-plan" class="plan empty">Read the configuration first.</div><label for="config-confirmation">Exact confirmation</label><input id="config-confirmation" autocomplete="off" disabled><button id="config-apply" class="danger" disabled>Apply and verify</button></article>
+      </div>
+    </section>
+
+    <section id="tab-monitoring" class="tab-page">
+      <div class="grid config-grid">
+        <article class="panel"><div class="section-head"><div><p class="kicker">LONG-TERM STORAGE</p><h2>Automatic USB monitoring</h2></div><span id="monitor-state" class="pill pending">Stopped</span></div>
+          <form id="monitor-form"><label class="check"><input id="monitor-enabled" type="checkbox"> Run background monitoring</label>
+            <label>Measurement interval, seconds<input id="monitor-measurement" type="number" min="10" max="86400" required></label><label>Health interval, seconds<input id="monitor-health" type="number" min="30" max="86400" required></label><label>Retention, days<input id="monitor-retention" type="number" min="1" max="3650" required></label>
+            <p class="hint">Values are stored in local SQLite. Serial requests are automatically serialized with manual reads and history recovery.</p><button class="primary" type="submit">Save and apply</button>
+          </form><div id="monitor-summary" class="status-line"></div>
+        </article>
+        <article class="panel"><p class="kicker">LOCAL ALERT RULES</p><h2>Thresholds</h2><div class="three-columns"><label>X absolute, °<input id="alert-x" type="number" min="0" step="any" placeholder="Disabled"></label><label>Y absolute, °<input id="alert-y" type="number" min="0" step="any" placeholder="Disabled"></label><label>Z absolute, °<input id="alert-z" type="number" min="0" step="any" placeholder="Disabled"></label></div><label>Maximum rate, °/minute<input id="alert-rate" type="number" min="0" step="any" placeholder="Disabled"></label><label>Low battery, V<input id="alert-battery" type="number" min="0" step="0.01" placeholder="Disabled"></label><label>Missing data after, seconds<input id="alert-missing" type="number" min="10" placeholder="Disabled"></label><label class="check"><input id="alert-error" type="checkbox"> Alert when the sensor reports an error</label></article>
+      </div>
+      <article class="panel"><div class="section-head"><div><p class="kicker">ALERT LIFECYCLE</p><h2>Open and resolved events</h2></div><button id="alerts-refresh">Refresh</button></div><div id="alerts-table" class="table-wrap empty">No alerts have been evaluated yet.</div></article>
+    </section>
+
+    <section id="tab-radio" class="tab-page">
+      <div class="grid">
+        <article class="panel"><div class="section-head"><div><p class="kicker">CURRENT RADIO</p><h2>Gateway and network</h2></div><button data-read="radio">Refresh</button></div><div id="radio-details" class="readable-results empty">No data has been read yet.</div></article>
+        <article class="panel"><p class="kicker">ORIGINAL APP PROFILES</p><h2>Regional configuration</h2><label for="profile-select">Profile to inspect</label><select id="profile-select"></select><div id="profile-details" class="profile-details"></div><p class="hint warning">Selecting a profile here does not write frequencies or a password to the sensor. Full radio configuration remains blocked until it can be tested with a gateway and valid credentials.</p></article>
+        <article class="panel"><p class="kicker">GATEWAY CREDENTIALS</p><h2>Replace network ID and password</h2><p class="muted">This updates embedded gateway authentication and join identifiers independently of the regional frequency profile. The password cannot be read back; only ACK, join identifiers, and network ID can be verified.</p><form id="gateway-form"><label>Network ID<input id="gateway-network-id" type="number" min="1" max="4294967295" required></label><label>Gateway password<input id="gateway-password" type="password" autocomplete="new-password" required></label><label>Exact confirmation<input id="gateway-confirmation" autocomplete="off" placeholder="CHANGE GATEWAY 101677 27484" required></label><p class="hint warning">Requires write mode. Keep the password separately; backups cannot recover it from the sensor.</p><button id="gateway-apply" class="danger" type="submit">Change gateway credentials</button></form><div id="gateway-result" class="status-line"></div></article>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab-page">
+      <article class="panel"><p class="kicker">RESUMABLE SENSOR RECOVERY</p><h2>Import history into SQLite</h2><div class="history-controls"><label>Start<input id="history-start" type="datetime-local"></label><label>End<input id="history-end" type="datetime-local"></label><label>Chunk, hours<input id="history-chunk" type="number" min="1" max="168" value="6"></label><label>Records per chunk<input id="history-limit" type="number" min="1" max="2000" value="1000"></label><button id="history-load" class="primary">Start import</button><button id="history-csv">Export stored CSV</button></div><p class="hint">Each completed chunk is committed separately. Interrupted jobs can resume without re-importing existing records.</p><div id="history-summary" class="status-line">History has not been imported yet.</div><div id="history-jobs" class="table-wrap"></div><div id="history-table" class="table-wrap"></div></article>
+    </section>
+
+    <section id="tab-backup" class="tab-page">
+      <div class="grid backup-grid">
+        <article class="panel"><p class="kicker">BACKUP</p><h2>Save the complete configuration</h2><p class="muted">The file contains a checksum, parameters, and technical evidence. JSON is not shown in the normal interface.</p><button id="backup-create" class="primary">Create backup</button><p id="backup-status" class="status-line">No backup has been created.</p></article>
+        <article class="panel"><p class="kicker">RESTORE</p><h2>Restore from a file</h2><label class="file-label">Choose a backup file<input id="backup-file" type="file" accept="application/json,.json"></label><button id="restore-preview" disabled>Compare with sensor</button><div id="restore-plan" class="plan empty">No file selected.</div><label for="confirmation">Exact confirmation</label><input id="confirmation" autocomplete="off" disabled><button id="restore-apply" class="danger" disabled>Restore and verify</button></article>
+      </div>
+    </section>
+
+    <section id="tab-maintenance" class="tab-page">
+      <div class="grid">
+        <article class="panel"><p class="kicker">REBOOT</p><h2>Safe restart</h2><p class="muted">A backup is created before reboot; node ID, uptime, and the complete configuration are verified afterward.</p><label for="reboot-confirmation">Enter REBOOT and the Node ID</label><input id="reboot-confirmation" autocomplete="off" placeholder="REBOOT 101677"><button id="reboot-button" class="danger">Restart sensor</button><div id="reboot-result" class="status-line"></div></article>
+        <article class="panel"><p class="kicker">FIRMWARE RECOVERY</p><h2>Reinstall verified firmware 2.81</h2><p class="muted">Uses the exact APK image, SHA-256 validation, the G6 bootloader password sequence, and XMODEM-CRC. A complete configuration backup is compared after the sensor returns.</p><button id="firmware-check">Validate image and sensor</button><div id="firmware-manifest" class="status-line">Not validated.</div><label for="firmware-confirmation">Exact confirmation</label><input id="firmware-confirmation" autocomplete="off" placeholder="FLASH FIRMWARE 101677 2.81"><button id="firmware-flash" class="danger" disabled>Reinstall firmware</button><div id="firmware-result" class="status-line"></div></article>
+        <article class="panel"><p class="kicker">FACTORY RESET RECOVERY</p><h2>Reset, restore, and verify</h2><p class="muted">This guarded workflow validates a backup, resets the node, restores radio, sampling, slot, axes, gateway credentials, reboots, and compares every readable configuration value.</p><label class="file-label">Pre-reset backup<input id="reset-backup-file" type="file" accept="application/json,.json"></label><label>Network ID<input id="reset-network-id" type="number" min="1" max="4294967295" required></label><label>Gateway password<input id="reset-gateway-password" type="password" autocomplete="new-password" required></label><label>Exact confirmation<input id="reset-confirmation" autocomplete="off" placeholder="RESET AND RESTORE 101677"></label><p class="hint warning">The password cannot be recovered from a backup. Keep it separately before starting. Do not disconnect USB during this workflow.</p><button id="reset-restore" class="danger" disabled>Factory reset and restore</button><div id="reset-result" class="status-line"></div></article>
+        <article class="panel"><p class="kicker">BOUNDARIES</p><h2>What remains blocked</h2><ul class="clean-list"><li>No firmware newer than 2.81 is present in the original APK.</li><li>The original application exposes calibration readback but no calibration write serializer.</li><li>Node ID changes remain blocked until a recovery-safe physical test is designed.</li><li>Radio reception and scheduled uplinks still require a real gateway for end-to-end verification.</li></ul></article>
+        <article class="panel"><div class="section-head"><div><p class="kicker">LINUX USB</p><h2>Connection diagnostics</h2></div><button id="usb-refresh">Run diagnostics</button></div><div id="usb-diagnostics" class="readable-results empty">Diagnostics have not been run.</div></article>
+        <article class="panel"><div class="section-head"><div><p class="kicker">READ-ONLY RECOVERY</p><h2>Why is the node not responding?</h2></div><button id="recovery-check" class="primary">Run complete check</button></div><p class="muted">Checks USB, serial response, identity, all readable configuration groups, power, radio plausibility, and recovery boundaries. It does not reboot, reset, or write.</p><div id="recovery-results" class="readable-results empty">The recovery check has not been run.</div></article>
+      </div>
+    </section>
+
+    <details class="panel engineering"><summary>Engineering log and UART evidence</summary><div class="section-head"><p class="muted">Only diagnostic messages and hex packets are shown here, never raw JSON.</p><button id="log-clear">Clear</button></div><ol id="log"></ol><div id="wire-evidence"></div></details>
+  </main>
+  <footer>Localhost only · Direct USB connection · No cloud · Writes disabled by default</footer>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+layer,direction,offset_bytes,offset_bits,size_bits,field,encoding,confidence,evidence
+uart_envelope,both,0,0,16,start_delimiter,constant 0x10 0x02,confirmed,C7580a.addHeaderAndFooter and g7/a.smali
+uart_envelope,both,2,variable,variable,escaped_body,DLE 0x10 duplicated,confirmed,C7580a.addHeaderAndFooter and validateMessageAndRemoveHeaderFooter
+uart_envelope,both,variable,variable,16,end_delimiter,constant 0x10 0x03,confirmed,C7580a.addHeaderAndFooter and g7/a.smali
+request_body,host_to_node,0,0,8,am_type,unsigned byte,confirmed,AbstractC7694S constructor writes AM type first
+request_body,host_to_node,1,8,variable,command_payload,message-specific,confirmed,AbstractC7694S subclasses append fields
+response_header,node_to_host,0,0,4,version,unsigned nibble value 4,confirmed,o7/d.smali parseHeader and C0392a
+response_header,node_to_host,0,4,4,node_id_high_or_reserved,unsigned nibble,confirmed with naming conflict,o7/d.smali uses as node ID high bits; C0392a names reserved
+response_header,node_to_host,1,8,8,product_code,unsigned byte,confirmed,o7/d.smali parseHeader and C0392a offsetBitsProductCode
+response_header,node_to_host,2,16,16,node_id_low,unsigned big-endian,confirmed,o7/d.smali readLong(true 16) and C0392a getMoteId
+response_header,node_to_host,0,4,20,node_id,high nibble plus big-endian low 16 bits,confirmed for active parser,o7/d.smali parseHeader
+response_header,node_to_host,4,32,8,sequence_number,unsigned byte,confirmed,o7/d.smali parseHeader and C0392a offsetBitsSeqNbr
+response_header,node_to_host,5,40,8,am_type,unsigned byte,confirmed,C7584d getType and C0392a offsetBitsType
+response_body,node_to_host,6,48,variable,message_payload,message-specific,confirmed,AbstractC8885d parses payload after header
+uart_envelope,both,not present,not present,0,length,delimiter-derived,confirmed,no length handling in C7580a
+uart_envelope,both,not present,not present,0,checksum_or_crc,none at this layer,confirmed,no checksum validation in C7580a or C7584d

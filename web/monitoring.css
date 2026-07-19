@@ -1,0 +1,15 @@
+.three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.three-columns label {
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .three-columns {
+    grid-template-columns: 1fr;
+  }
+}
