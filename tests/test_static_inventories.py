@@ -2,14 +2,19 @@ import csv
 import hashlib
 from pathlib import Path
 
+import pytest
+
 
 def test_firmware_inventory_matches_embedded_files() -> None:
     inventory = Path("analysis/firmware/inventory.csv")
+    firmware_directory = Path("analysis/apktool/unknown/firmwares")
+    if not firmware_directory.is_dir():
+        pytest.skip("Extracted firmware evidence is not included in the source repository")
     with inventory.open(newline="", encoding="utf-8") as stream:
         rows = list(csv.DictReader(stream))
     assert len(rows) == 15
     for row in rows:
-        path = Path("analysis/apktool/unknown/firmwares") / row["filename"]
+        path = firmware_directory / row["filename"]
         data = path.read_bytes()
         assert len(data) == int(row["size_bytes"])
         assert hashlib.sha256(data).hexdigest() == row["sha256"]
