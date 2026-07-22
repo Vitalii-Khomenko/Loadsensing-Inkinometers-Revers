@@ -65,6 +65,7 @@ This switch does not expose arbitrary writes. It enables only physically validat
 - browse measurements stored by live, manual, or history sources and export them as CSV;
 - diagnose stable USB identity, permissions, ModemManager conflicts, and reconnect state;
 - run a complete read-only recovery assessment covering USB, health, identity, configuration plausibility, the APK factory-reset sentinel, and allowed/blocked actions;
+- run a separate deep diagnostic suite for damaged sensors with passive bootloader hints, raw UART framing counts, repeated health/identity, per-family configuration reads, five-measurement analysis, uptime-reset detection, bounded history, failure classification, and JSON/CSV reports;
 - perform the hardware-validated reboot flow when writes are explicitly enabled;
 - keep exact TX/RX evidence collapsed in a separate engineering section;
 - create a complete JSON configuration backup with a SHA-256 corruption check;

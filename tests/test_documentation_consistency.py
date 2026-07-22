@@ -19,6 +19,7 @@ def test_documentation_entry_points_exist() -> None:
         "docs/testing-plan.md",
         "docs/web-app.md",
         "docs/docker-deployment.md",
+        "docs/deep-diagnostics.md",
         "docs/node-identity.md",
         "docs/android-feature-parity.md",
         "docs/gateway-feasibility.md",

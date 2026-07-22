@@ -82,6 +82,7 @@ Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` a
 | `tools/usb_diagnostics.py`, `config/99-til90-cp210x.rules` | Stable Linux identity, access diagnostics, and permanent udev template | Implemented; current adapter verified |
 | `docs/monitoring-and-alerts.md` | Persistent acquisition, schema, alert semantics, and reliability boundary | Current design and operator reference |
 | `docs/smartphone-connection-recovery.md` | Original APK connection path and safe sensor recovery decision tree | Current troubleshooting reference |
+| `docs/deep-diagnostics.md` | Dedicated read-only damaged-sensor triage, classifications, and downloadable evidence | Implemented and synthetic-tested |
 | `docs/remaining-work.md` | Consolidated unfinished work and validation gates | Current backlog |
 | `tests/` | Synthetic and consistency tests | Automated validation |
 | `captures/` | Reference-session layout and metadata template | Capture-pending |

@@ -73,6 +73,11 @@ def test_frontend_has_no_external_runtime_dependencies() -> None:
     assert "Apply selected profile" in page
     assert "APPLY PROFILE ${currentNodeId} ${p.name}" in script
     assert 'api("/api/radio/profile"' in script
+    assert "Deep diagnostics for damaged sensors" in page
+    assert "Run deep diagnostics" in page
+    assert 'api("/api/diagnostics/deep"' in script
+    assert "Download JSON evidence" in page
+    assert "Download CSV summary" in page
     assert "<pre" not in page
     assert "JSON.stringify(results" not in script
     assert "Waiting for the first automatic measurement" in page
@@ -211,6 +216,21 @@ def test_monitoring_alert_and_usb_diagnostic_apis(tmp_path) -> None:
         assert recovery.status_code == 200
         assert recovery.json()["overall"] == "failed"
         assert recovery.json()["steps"][0]["name"] == "USB enumeration"
+
+
+def test_deep_diagnostic_api_and_report_downloads(tmp_path) -> None:
+    with TestClient(create_app(FakeDevice(), database_path=tmp_path / "data.sqlite3")) as client:
+        token = client.get("/api/session").json()["token"]
+        headers = {"X-TIL90-Token": token}
+        report = client.post("/api/diagnostics/deep", headers=headers)
+        assert report.status_code == 200
+        assert report.json()["read_only"]
+        assert report.json()["persistent_writes_sent"] == 0
+        json_download = client.get("/api/diagnostics/deep/report.json", headers=headers)
+        csv_download = client.get("/api/diagnostics/deep/report.csv", headers=headers)
+        assert json_download.status_code == csv_download.status_code == 200
+        assert "attachment" in json_download.headers["content-disposition"]
+        assert csv_download.text.startswith("category,name,status,detail")
 
 
 def test_resumable_history_job_and_csv_api(tmp_path) -> None:

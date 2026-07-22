@@ -22,6 +22,7 @@
       <button class="tab" data-tab="radio">Radio &amp; gateway</button>
       <button class="tab" data-tab="history">History</button>
       <button class="tab" data-tab="backup">Backup</button>
+      <button class="tab" data-tab="diagnostics">Deep diagnostics</button>
       <button class="tab" data-tab="maintenance">Maintenance</button>
     </nav>
 
@@ -106,6 +107,22 @@
         <article class="panel"><p class="kicker">BACKUP</p><h2>Save the complete configuration</h2><p class="muted">The file contains a checksum, parameters, and technical evidence. JSON is not shown in the normal interface.</p><button id="backup-create" class="primary">Create backup</button><p id="backup-status" class="status-line">No backup has been created.</p></article>
         <article class="panel"><p class="kicker">RESTORE</p><h2>Restore from a file</h2><label class="file-label">Choose a backup file<input id="backup-file" type="file" accept="application/json,.json"></label><button id="restore-preview" disabled>Compare with sensor</button><div id="restore-plan" class="plan empty">No file selected.</div><label for="confirmation">Exact confirmation</label><input id="confirmation" autocomplete="off" disabled><button id="restore-apply" class="danger" disabled>Restore and verify</button></article>
       </div>
+    </section>
+
+    <section id="tab-diagnostics" class="tab-page">
+      <article class="hero panel">
+        <div><p class="kicker">READ-ONLY FAILURE ANALYSIS</p><h2>Deep diagnostics for damaged sensors</h2><p class="muted">Runs passive bootloader listening, raw UART framing checks, five health and identity attempts, every readable configuration family, five X/Y/Z measurements, stored uptime analysis, and a bounded history check. A healthy TIL90 normally needs about one minute because each physical measurement can take approximately ten seconds.</p></div>
+        <div class="actions"><span id="deep-state" class="pill pending">Not started</span><button id="deep-run" class="primary">Run deep diagnostics</button></div>
+      </article>
+      <div class="actions report-actions"><button id="deep-json" disabled>Download JSON evidence</button><button id="deep-csv" disabled>Download CSV summary</button></div>
+      <div id="deep-summary" class="readable-results empty">No deep diagnostic report is available.</div>
+      <div class="grid">
+        <article class="panel"><p class="kicker">DIAGNOSTIC STAGES</p><h2>Checks</h2><div id="deep-steps" class="table-wrap empty">Run the diagnostic suite first.</div></article>
+        <article class="panel"><p class="kicker">INTERPRETATION</p><h2>Recommended next actions</h2><div id="deep-recommendations" class="empty">Recommendations will appear after the run.</div></article>
+      </div>
+      <article class="panel"><p class="kicker">TECHNICAL FINDINGS</p><h2>Power, UART, configuration, measurements and history</h2><div id="deep-details" class="readable-results empty">No findings yet.</div></article>
+      <article class="panel"><p class="kicker">INDIVIDUAL READS</p><h2>Query matrix</h2><div id="deep-query-table" class="table-wrap empty">No requests have been evaluated.</div></article>
+      <p class="hint warning">This tab sends only documented read requests and a passive serial listen. It never enters the bootloader, resets, reboots, flashes firmware, or writes persistent sensor configuration.</p>
     </section>
 
     <section id="tab-maintenance" class="tab-page">

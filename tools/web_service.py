@@ -33,6 +33,7 @@ from tools.monitoring_service import MonitoringService
 from tools.monitoring_store import MonitoringStore
 from tools.usb_diagnostics import diagnose
 from tools.recovery_check import run_recovery_check
+from tools.deep_diagnostics import diagnostic_report_csv, run_deep_diagnostics
 from tools.radio_configuration import (
     RadioConfigurationError,
     apply_regional_profile,
@@ -185,6 +186,7 @@ def create_app(
         openapi_url=None, lifespan=lifespan,
     )
     configuration_plans: dict[str, tuple[float, dict[str, Any]]] = {}
+    latest_deep_report: dict[str, Any] | None = None
 
     def compact_configuration(snapshot: dict[str, Any]) -> dict[str, Any]:
         config = snapshot["configuration"]
@@ -295,6 +297,38 @@ def create_app(
     def recovery_check(x_til90_token: str | None = Header(default=None)):
         require_token(x_til90_token)
         return run_recovery_check(service)
+
+    @app.post("/api/diagnostics/deep")
+    def deep_diagnostics(x_til90_token: str | None = Header(default=None)):
+        nonlocal latest_deep_report
+        require_token(x_til90_token)
+        latest_deep_report = run_deep_diagnostics(service, store)
+        return latest_deep_report
+
+    @app.get("/api/diagnostics/deep/report.json")
+    def deep_diagnostics_json(x_til90_token: str | None = Header(default=None)):
+        require_token(x_til90_token)
+        if latest_deep_report is None:
+            raise HTTPException(status_code=404, detail="no deep diagnostic report is available")
+        node_ids = latest_deep_report.get("health", {}).get("node_ids", [])
+        node_id = node_ids[-1] if node_ids else "unknown"
+        return JSONResponse(
+            latest_deep_report,
+            headers={"Content-Disposition": f'attachment; filename="til90-{node_id}-diagnostics.json"'},
+        )
+
+    @app.get("/api/diagnostics/deep/report.csv")
+    def deep_diagnostics_csv(x_til90_token: str | None = Header(default=None)):
+        require_token(x_til90_token)
+        if latest_deep_report is None:
+            raise HTTPException(status_code=404, detail="no deep diagnostic report is available")
+        node_ids = latest_deep_report.get("health", {}).get("node_ids", [])
+        node_id = node_ids[-1] if node_ids else "unknown"
+        return StreamingResponse(
+            iter([diagnostic_report_csv(latest_deep_report)]),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="til90-{node_id}-diagnostics.csv"'},
+        )
 
     @app.get("/api/capabilities")
     def capabilities() -> dict[str, Any]:
