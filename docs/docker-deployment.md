@@ -74,13 +74,7 @@ docker compose up --build -d
 
 ## Explicit write mode
 
-The base Compose service is deliberately read-only for sensor operations. To service a sensor with the physically validated write workflows, first place the exact `LSG_TIL90_v2_81.bin` firmware outside Git and set its absolute path in `.env`:
-
-```text
-TIL90_FIRMWARE_PATH=/absolute/path/to/LSG_TIL90_v2_81.bin
-```
-
-The accepted file is exactly 124288 bytes with SHA-256:
+The base Compose service is deliberately read-only for sensor operations. The repository includes the exact hardware-tested `firmware/LSG_TIL90_v2_81.bin` recovery image, and Docker copies it into the image during the build. The service accepts it only when it is exactly 124288 bytes with SHA-256:
 
 ```text
 9dba6261df792649b0cebd0db86f1aa459bb93209b8783dad2da020a5f0b227f

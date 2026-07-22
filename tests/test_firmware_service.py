@@ -54,6 +54,14 @@ def test_xmodem_aborts_on_bootloader_cancel():
         send_xmodem(FakeConnection(), FakeReader([0x18]), b"payload", apk_crc_probe_retries=0)
 
 
+def test_bundled_firmware_matches_validated_manifest():
+    manifest = validate_firmware_file(firmware_service.G6_TIL90_FIRMWARE)
+    assert manifest["size_bytes"] == 124288
+    assert manifest["sha256"] == firmware_service.G6_TIL90_SHA256
+    assert manifest["target_product_code"] == 0x4E
+    assert manifest["version"] == "2.81"
+
+
 def test_standalone_firmware_validation_accepts_only_exact_artifact(tmp_path, monkeypatch):
     payload = b"validated-test-image"
     path = tmp_path / firmware_service.G6_TIL90_FIRMWARE.name

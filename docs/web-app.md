@@ -53,7 +53,7 @@ This switch does not expose arbitrary writes. It enables only physically validat
 - present identity, health, live tilt, configuration, radio and gateway values as readable English cards instead of raw JSON;
 - plot recent X/Y/Z samples and show a measurement table without overlapping the approximately ten-second requests;
 - configure measurement interval, gateway radio-slot time and enabled X/Y/Z axes from presets or validated custom values;
-- replace embedded gateway network ID and password independently of the regional profile;
+- replace embedded gateway network ID and password independently of the regional profile with one submit action; the browser derives the backend confirmation from the freshly read node ID and entered network ID, then retains the last submitted credentials in browser-local storage for repetitive provisioning;
 - validate and reinstall the exact APK-mapped G6 TIL90 firmware 2.81 image;
 - run a guarded factory-reset, full backup-driven restore, reboot, and final configuration comparison;
 - preview all changes before write and require exact `RESTORE <node-id>` confirmation;

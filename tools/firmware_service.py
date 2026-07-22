@@ -14,9 +14,7 @@ from tools.packet_parser import encode_frame
 from tools.til90_cli import _open_serial
 
 
-G6_TIL90_FIRMWARE = Path(
-    "analysis/jadx/resources/firmwares/LSG_TIL90_v2_81.bin"
-)
+G6_TIL90_FIRMWARE = Path("firmware/LSG_TIL90_v2_81.bin")
 G6_TIL90_SHA256 = "9dba6261df792649b0cebd0db86f1aa459bb93209b8783dad2da020a5f0b227f"
 G6_TIL90_SIZE = 124288
 G6_TIL90_PRODUCT = 0x4E

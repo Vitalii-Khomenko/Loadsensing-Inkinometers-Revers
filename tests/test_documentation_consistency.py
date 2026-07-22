@@ -25,6 +25,8 @@ def test_documentation_entry_points_exist() -> None:
         "Dockerfile",
         "compose.yaml",
         "compose.write.yaml",
+        "firmware/README.md",
+        "firmware/LSG_TIL90_v2_81.bin",
         "requirements.txt",
         "tests/test_language_policy.py",
         "captures/README.md",

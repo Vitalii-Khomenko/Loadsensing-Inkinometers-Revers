@@ -63,6 +63,13 @@ def test_frontend_has_no_external_runtime_dependencies() -> None:
     assert "Reinstall verified firmware 2.81" in page
     assert "Reset, restore, and verify" in page
     assert "Replace network ID and password" in page
+    assert "Confirm and apply" in page
+    assert 'id="gateway-confirmation"' not in page
+    assert "CHANGE GATEWAY ${currentNodeId} ${networkId}" in script
+    assert 'gatewayCredentialsStorageKey="til90.gatewayCredentials"' in script
+    assert "loadGatewayCredentials();" in script
+    assert "saveGatewayCredentials(networkId,password)" in script
+    assert "saved locally in this browser for the next sensor" in page
     assert "<pre" not in page
     assert "JSON.stringify(results" not in script
     assert "Waiting for the first automatic measurement" in page

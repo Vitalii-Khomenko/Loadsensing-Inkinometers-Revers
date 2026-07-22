@@ -30,7 +30,7 @@ docker compose up --build -d
 
 Open `http://127.0.0.1:8765/`, then connect the sensor. The default container remains read-only for sensor operations. Host UID/GID, permanent udev access, hotplug behavior, security controls, and validation commands are documented in `docs/docker-deployment.md`.
 
-An explicit write-mode override enables only the hardware-validated guarded workflows and requires the separately supplied, hash-validated firmware 2.81 binary:
+An explicit write-mode override enables only the hardware-validated guarded workflows. The hardware-tested, hash-validated firmware 2.81 artifact is bundled into the image from `firmware/LSG_TIL90_v2_81.bin`:
 
 ```bash
 docker compose -f compose.yaml -f compose.write.yaml up --build -d
