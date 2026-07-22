@@ -846,3 +846,19 @@ Documented the Windows boundary from current Docker and Microsoft guidance: Dock
 Updated the Linux udev template to request ModemManager exclusion. Added operator documentation for host UID/GID mapping, dialout access, start/stop/rebuild, persistence, rootless limitations, multiple-device ambiguity, and physical acceptance testing.
 
 Recovered the official application's version-aware node-ID path for documentation. It accepts a 20-bit value on recent firmware, verifies a health response at the new ID, and retains a legacy 16-bit branch. No second application command was found for rewriting serial, product, calibration identity, or a possible manufacturing fallback ID; deeper identity modification remains blocked pending an authorized service path and recovery-safe physical validation.
+
+### 2026-07-22 — Batch provisioning, bundled firmware, and deep diagnostics completed
+
+Status: implemented, container-deployed, automated-tested, and physically validated on node 101677
+
+Simplified embedded gateway provisioning to a network-ID field, password field and one confirmation action. The browser derives the exact node-specific backend confirmation and retains the last submitted credentials in browser-local storage for repeated sensor batches. The backend still performs identity checks, acknowledgement and network-ID readback.
+
+Added one-button application of the physically validated embedded `EUROPE` regional profile. It writes only the confirmed radio-general and six-uplink fields, preserves gateway identity, credentials, radio address, sampling and slot values, verifies readback, and rolls back on failure. The other 19 original-application profiles remain inspection-only.
+
+Promoted the exact tested `LSG_TIL90_v2_81.bin` artifact into the maintained `firmware/` directory and Docker image. Runtime validation still requires its 124288-byte size, SHA-256 `9dba6261df792649b0cebd0db86f1aa459bb93209b8783dad2da020a5f0b227f`, product `0x4E` and version `2.81`. APK archives and extracted or decompiled APK trees remain excluded from Git and the Docker context.
+
+Added the dedicated **Deep diagnostics** browser tab and `tools/deep_diagnostics.py`. The read-only suite checks Linux USB access, passive XMODEM control-byte hints, raw UART framing, five health reads, five identity reads, every readable configuration family independently, five live X/Y/Z measurements, stored uptime resets, bounded history, TIL90 2.81 reference values and embedded EUROPE fields. It classifies the most likely failure layer and offers token-protected JSON evidence and CSV summary downloads. It never enters the bootloader or sends persistent writes.
+
+The physical Docker run completed in 62.44 seconds with 5/5 health, 5/5 identity, 13/13 independently evaluated groups, 5/5 measurements, zero sensor error codes, zero framing errors, quiet passive bootloader status, and a normally completed 77-record history response. It classified the healthy sensor as `sensor_responsive_phone_or_app_likely` and reported `persistent_writes_sent: 0`.
+
+The final automated suite reports 95 passing tests, successful Python compilation, valid JavaScript syntax, a valid write-mode Compose model, a healthy auto-restarting container, and working JSON/CSV diagnostic downloads.

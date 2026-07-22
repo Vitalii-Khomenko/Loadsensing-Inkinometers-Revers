@@ -221,6 +221,19 @@ class MonitoringStore:
             row = self._db.execute(sql + " ORDER BY timestamp DESC LIMIT 1", args).fetchone()
         return dict(row) if row else None
 
+    def recent_health(
+        self, node_id: int | None = None, limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        sql, args = "SELECT * FROM health", []
+        if node_id is not None:
+            sql += " WHERE node_id=?"
+            args.append(node_id)
+        sql += " ORDER BY timestamp DESC LIMIT ?"
+        args.append(min(max(limit, 1), 500))
+        with self._lock:
+            rows = self._db.execute(sql, args).fetchall()
+        return [dict(row) for row in rows]
+
     def summary(self) -> dict[str, Any]:
         with self._lock:
             sample_count = self._db.execute("SELECT count(*) FROM samples").fetchone()[0]

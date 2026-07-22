@@ -18,8 +18,3 @@ services:
       - "60"
       - --enable-writes
       - --require-validated-firmware
-    volumes:
-      - type: bind
-        source: ${TIL90_FIRMWARE_PATH:?Set TIL90_FIRMWARE_PATH to the verified LSG_TIL90_v2_81.bin file}
-        target: /app/analysis/jadx/resources/firmwares/LSG_TIL90_v2_81.bin
-        read_only: true

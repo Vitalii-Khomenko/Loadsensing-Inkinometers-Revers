@@ -33,7 +33,12 @@ from tools.monitoring_service import MonitoringService
 from tools.monitoring_store import MonitoringStore
 from tools.usb_diagnostics import diagnose
 from tools.recovery_check import run_recovery_check
-from tools.radio_configuration import RadioConfigurationError, change_gateway_credentials
+from tools.deep_diagnostics import diagnostic_report_csv, run_deep_diagnostics
+from tools.radio_configuration import (
+    RadioConfigurationError,
+    apply_regional_profile,
+    change_gateway_credentials,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,6 +113,11 @@ class GatewayCredentialsRequest(BaseModel):
     confirmation: str
 
 
+class RegionalProfileRequest(BaseModel):
+    profile: str = Field(min_length=1, max_length=40)
+    confirmation: str
+
+
 class FirmwareRequest(BaseModel):
     confirmation: str
 
@@ -176,6 +186,7 @@ def create_app(
         openapi_url=None, lifespan=lifespan,
     )
     configuration_plans: dict[str, tuple[float, dict[str, Any]]] = {}
+    latest_deep_report: dict[str, Any] | None = None
 
     def compact_configuration(snapshot: dict[str, Any]) -> dict[str, Any]:
         config = snapshot["configuration"]
@@ -287,6 +298,38 @@ def create_app(
         require_token(x_til90_token)
         return run_recovery_check(service)
 
+    @app.post("/api/diagnostics/deep")
+    def deep_diagnostics(x_til90_token: str | None = Header(default=None)):
+        nonlocal latest_deep_report
+        require_token(x_til90_token)
+        latest_deep_report = run_deep_diagnostics(service, store)
+        return latest_deep_report
+
+    @app.get("/api/diagnostics/deep/report.json")
+    def deep_diagnostics_json(x_til90_token: str | None = Header(default=None)):
+        require_token(x_til90_token)
+        if latest_deep_report is None:
+            raise HTTPException(status_code=404, detail="no deep diagnostic report is available")
+        node_ids = latest_deep_report.get("health", {}).get("node_ids", [])
+        node_id = node_ids[-1] if node_ids else "unknown"
+        return JSONResponse(
+            latest_deep_report,
+            headers={"Content-Disposition": f'attachment; filename="til90-{node_id}-diagnostics.json"'},
+        )
+
+    @app.get("/api/diagnostics/deep/report.csv")
+    def deep_diagnostics_csv(x_til90_token: str | None = Header(default=None)):
+        require_token(x_til90_token)
+        if latest_deep_report is None:
+            raise HTTPException(status_code=404, detail="no deep diagnostic report is available")
+        node_ids = latest_deep_report.get("health", {}).get("node_ids", [])
+        node_id = node_ids[-1] if node_ids else "unknown"
+        return StreamingResponse(
+            iter([diagnostic_report_csv(latest_deep_report)]),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="til90-{node_id}-diagnostics.csv"'},
+        )
+
     @app.get("/api/capabilities")
     def capabilities() -> dict[str, Any]:
         return {
@@ -295,11 +338,13 @@ def create_app(
             "restore": {
                 "implemented": [
                     "sampling", "channels", "radio_slot_time", "gateway_credentials",
-                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+                    "regional_profile_europe", "reboot", "factory_reset_and_restore",
+                    "firmware_2.81_recovery",
                 ],
                 "hardware_validated_workflows": [
                     "sampling", "channels", "radio_slot_time", "gateway_credentials",
-                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+                    "regional_profile_europe", "reboot", "factory_reset_and_restore",
+                    "firmware_2.81_recovery",
                 ],
                 "hardware_validated": sorted(service.hardware_validated_writes),
                 "writes_enabled": service.writes_enabled,
@@ -310,6 +355,25 @@ def create_app(
     @app.get("/api/radio-profiles")
     def radio_profiles() -> dict[str, Any]:
         return json.loads((ROOT / "analysis" / "protocol" / "radio_profiles.json").read_text())
+
+    @app.post("/api/radio/profile")
+    def regional_profile(
+        body: RegionalProfileRequest,
+        x_til90_token: str | None = Header(default=None),
+    ):
+        require_token(x_til90_token)
+        if not service.writes_enabled:
+            raise HTTPException(status_code=400, detail="hardware writes are disabled")
+        try:
+            result = apply_regional_profile(service, body.profile, body.confirmation)
+            return {
+                "status": result["status"],
+                "node_id": result["node_id"],
+                "profile": result["profile"],
+                "operations": result["operations"],
+            }
+        except (RadioConfigurationError, DeviceServiceError) as exc:
+            raise handle_error(exc) from exc
 
     @app.post("/api/radio/gateway-credentials")
     def gateway_credentials(

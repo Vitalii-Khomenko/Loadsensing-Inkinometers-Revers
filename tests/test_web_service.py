@@ -63,6 +63,21 @@ def test_frontend_has_no_external_runtime_dependencies() -> None:
     assert "Reinstall verified firmware 2.81" in page
     assert "Reset, restore, and verify" in page
     assert "Replace network ID and password" in page
+    assert "Confirm and apply" in page
+    assert 'id="gateway-confirmation"' not in page
+    assert "CHANGE GATEWAY ${currentNodeId} ${networkId}" in script
+    assert 'gatewayCredentialsStorageKey="til90.gatewayCredentials"' in script
+    assert "loadGatewayCredentials();" in script
+    assert "saveGatewayCredentials(networkId,password)" in script
+    assert "saved locally in this browser for the next sensor" in page
+    assert "Apply selected profile" in page
+    assert "APPLY PROFILE ${currentNodeId} ${p.name}" in script
+    assert 'api("/api/radio/profile"' in script
+    assert "Deep diagnostics for damaged sensors" in page
+    assert "Run deep diagnostics" in page
+    assert 'api("/api/diagnostics/deep"' in script
+    assert "Download JSON evidence" in page
+    assert "Download CSV summary" in page
     assert "<pre" not in page
     assert "JSON.stringify(results" not in script
     assert "Waiting for the first automatic measurement" in page
@@ -113,7 +128,12 @@ def test_destructive_web_operations_require_explicit_write_mode() -> None:
         },
         headers=headers,
     )
-    assert flash.status_code == reset.status_code == gateway.status_code == 400
+    profile = client.post(
+        "/api/radio/profile",
+        json={"profile": "EUROPE", "confirmation": "APPLY PROFILE 101677 EUROPE"},
+        headers=headers,
+    )
+    assert flash.status_code == reset.status_code == gateway.status_code == profile.status_code == 400
 
 
 def test_capabilities_list_only_validated_write_workflows() -> None:
@@ -121,7 +141,8 @@ def test_capabilities_list_only_validated_write_workflows() -> None:
     restore = client.get("/api/capabilities").json()["restore"]
     assert restore["hardware_validated_workflows"] == [
         "sampling", "channels", "radio_slot_time", "gateway_credentials",
-        "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+        "regional_profile_europe", "reboot", "factory_reset_and_restore",
+        "firmware_2.81_recovery",
     ]
     assert restore["blocked"] == [
         "calibration_write", "node_identity_write", "newer_firmware",
@@ -195,6 +216,21 @@ def test_monitoring_alert_and_usb_diagnostic_apis(tmp_path) -> None:
         assert recovery.status_code == 200
         assert recovery.json()["overall"] == "failed"
         assert recovery.json()["steps"][0]["name"] == "USB enumeration"
+
+
+def test_deep_diagnostic_api_and_report_downloads(tmp_path) -> None:
+    with TestClient(create_app(FakeDevice(), database_path=tmp_path / "data.sqlite3")) as client:
+        token = client.get("/api/session").json()["token"]
+        headers = {"X-TIL90-Token": token}
+        report = client.post("/api/diagnostics/deep", headers=headers)
+        assert report.status_code == 200
+        assert report.json()["read_only"]
+        assert report.json()["persistent_writes_sent"] == 0
+        json_download = client.get("/api/diagnostics/deep/report.json", headers=headers)
+        csv_download = client.get("/api/diagnostics/deep/report.csv", headers=headers)
+        assert json_download.status_code == csv_download.status_code == 200
+        assert "attachment" in json_download.headers["content-disposition"]
+        assert csv_download.text.startswith("category,name,status,detail")
 
 
 def test_resumable_history_job_and_csv_api(tmp_path) -> None:

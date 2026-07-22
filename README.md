@@ -15,6 +15,7 @@ This repository documents a safety-first reverse engineering effort for a Worlds
 - After official post-repair programming, its radio is enabled as embedded `EU868_V1` with network ID `27484`, six 868 MHz uplinks, SF11, and TX power 14; the network password is not returned by the read protocol.
 - An English localhost operator console provides readable inspection, graphs, persistent SQLite monitoring, local alerts, resumable/deduplicated history, CSV export, USB diagnostics, configuration presets, checksummed backup/restore and guarded reboot. Sampling, axis flags and gateway radio-slot time are hardware-validated write families.
 - All 20 original Android radio profiles are inventoried; the current hardware configuration exactly matches embedded `EUROPE`.
+- A dedicated read-only deep-diagnostics tab classifies USB, power/MCU/UART, framing, bootloader hints, identity, configuration, measurement and history failures and exports JSON/CSV evidence; its complete physical run on node `101677` passed with zero persistent writes.
 - Bounded history returned 18 records, reboot reset uptime without changing configuration, and a temporary Z-axis disable produced an X/Y-only reading before verified restoration.
 - The physical node passed an exact-image firmware 2.81 reflash, factory reset, complete backup-driven restoration with new gateway credentials, reboot, and a final zero-difference configuration comparison.
 
@@ -30,13 +31,13 @@ docker compose up --build -d
 
 Open `http://127.0.0.1:8765/`, then connect the sensor. The default container remains read-only for sensor operations. Host UID/GID, permanent udev access, hotplug behavior, security controls, and validation commands are documented in `docs/docker-deployment.md`.
 
-An explicit write-mode override enables only the hardware-validated guarded workflows and requires the separately supplied, hash-validated firmware 2.81 binary:
+An explicit write-mode override enables only the hardware-validated guarded workflows. The hardware-tested, hash-validated firmware 2.81 artifact is bundled into the image from `firmware/LSG_TIL90_v2_81.bin`:
 
 ```bash
 docker compose -f compose.yaml -f compose.write.yaml up --build -d
 ```
 
-Write mode still requires operation-specific confirmation, ACK/readback, backups, and rollback. It does not enable node-identity, calibration, arbitrary-packet, or arbitrary-firmware writes.
+Write mode still requires operation-specific confirmation, ACK/readback, backups, and rollback. It includes the hardware-validated embedded `EUROPE` regional profile while leaving every unvalidated regional profile blocked. It does not enable node-identity, calibration, arbitrary-packet, or arbitrary-firmware writes.
 
 ## Measurement axes and operating principle
 
@@ -68,7 +69,7 @@ Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` a
 | `Goal.md` | Full project specification and safety stages | Authoritative scope |
 | `ROADMAP.md` | Dated English progress log and next gate | Authoritative status |
 | `docs/multi-sensor-wired.md` | Proposed ten-sensor wired Linux architecture and test plan | Design complete; implementation pending |
-| `docs/docker-deployment.md` | Container build, Linux USB hotplug, automatic acquisition, and operation | Smoke-tested without hardware |
+| `docs/docker-deployment.md` | Container build, Linux USB hotplug, automatic acquisition, and operation | Physically validated on node 101677 |
 | `docs/node-identity.md` | Protocol node ID, factory identity, reset behavior, and safety boundary | Static-confirmed; write blocked |
 | `docs/README.md` | Documentation index and evidence labels | Current navigation |
 | `docs/protocol.md` | Consolidated protocol summary | Current technical summary |
@@ -82,6 +83,7 @@ Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` a
 | `tools/usb_diagnostics.py`, `config/99-til90-cp210x.rules` | Stable Linux identity, access diagnostics, and permanent udev template | Implemented; current adapter verified |
 | `docs/monitoring-and-alerts.md` | Persistent acquisition, schema, alert semantics, and reliability boundary | Current design and operator reference |
 | `docs/smartphone-connection-recovery.md` | Original APK connection path and safe sensor recovery decision tree | Current troubleshooting reference |
+| `docs/deep-diagnostics.md` | Dedicated read-only damaged-sensor triage, classifications, and downloadable evidence | Implemented, synthetic-tested and physically validated |
 | `docs/remaining-work.md` | Consolidated unfinished work and validation gates | Current backlog |
 | `tests/` | Synthetic and consistency tests | Automated validation |
 | `captures/` | Reference-session layout and metadata template | Capture-pending |

@@ -13,9 +13,10 @@ COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir --requirement requirements.txt
 
 COPY analysis/protocol/ ./analysis/protocol/
+COPY firmware/ ./firmware/
 COPY tools/ ./tools/
 COPY web/ ./web/
-RUN mkdir -p /app/data /app/analysis/jadx/resources/firmwares
+RUN mkdir -p /app/data
 
 EXPOSE 8765
 
