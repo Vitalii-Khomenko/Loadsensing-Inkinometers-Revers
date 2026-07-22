@@ -63,6 +63,23 @@ GET  /api/diagnostics/deep/report.csv
 
 Reports do not contain the saved gateway password because that password is never readable from the sensor and the diagnostic engine does not access browser-local credential storage.
 
+## Physical acceptance result
+
+A complete Docker-hosted run against node `101677`, product `0x4E`, firmware `2.81`, completed in `62.44` seconds and reported `persistent_writes_sent: 0`. The result was `ready` with classification `sensor_responsive_phone_or_app_likely`:
+
+- five of five health reads passed;
+- five of five identity reads passed;
+- all 13 independently evaluated identity/configuration groups passed;
+- five of five X/Y/Z measurements passed with error code zero;
+- gravity-vector norms remained approximately one and no angle, noise or stuck-axis warning was produced;
+- UART framing decoded normally with zero framing errors;
+- passive bootloader status was quiet;
+- the bounded history request completed normally with 77 records;
+- the embedded EUROPE and TIL90 2.81 reference comparisons passed;
+- JSON and CSV downloads were returned by the running container.
+
+This healthy-node result validates the complete diagnostic path and its reference classification. Each damaged-sensor classification still depends on observing the corresponding physical failure condition.
+
 ## Recovery boundary
 
 A passive XMODEM control-byte hint is not sufficient product identification and does not authorize a firmware transfer. An unidentified board must not be flashed automatically. When health and identity remain readable, create a checksummed backup before using any separate guarded repair workflow.

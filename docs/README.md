@@ -23,8 +23,8 @@ Evidence labels used in this project:
 | `cli-usage.md` | Safe Linux CLI commands and serial prerequisites | Implemented and hardware-tested |
 | `maintenance-cli.md` | Reboot, rollback validation, factory reset, post-reset restore, and firmware recovery commands | Hardware-confirmed on node 101677 |
 | `web-app.md` | Local browser UI, monitoring, alerts, resumable history, USB diagnostics, backup/restore, and security boundary | Implemented; write subset hardware-tested |
-| `deep-diagnostics.md` | Layered read-only triage, failure classifications, passive bootloader hints, query matrix, and JSON/CSV reports | Implemented and synthetic-tested |
-| `docker-deployment.md` | Linux Docker build, USB hotplug, automatic monitoring, persistence, and security | Container smoke-tested without hardware |
+| `deep-diagnostics.md` | Layered read-only triage, failure classifications, passive bootloader hints, query matrix, and JSON/CSV reports | Implemented, synthetic-tested and physically validated |
+| `docker-deployment.md` | Linux Docker build, USB hotplug, automatic monitoring, persistence, and security | Physically validated on node 101677 |
 | `node-identity.md` | Writable protocol node ID versus factory identity and deeper-change boundary | Static-confirmed; physical node-ID change blocked |
 | `monitoring-and-alerts.md` | SQLite schema, acquisition flow, alert lifecycle, scheduling, and operational limits | Implemented and synthetic-tested |
 | `smartphone-connection-recovery.md` | APK USB flow, phone/Linux troubleshooting, read-only recovery, reset and firmware boundaries | Static-confirmed and implemented where safe |
