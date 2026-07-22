@@ -13,7 +13,7 @@ TEXT_SUFFIXES = {
 AUTHORED_ROOT_FILES = {
     ".dockerignore", "AGENTS.md", "APK-Info.md", "Command.md", "Dockerfile",
     "Goal.md", "README.md", "ROADMAP.md", "StartCommands.md", "compose.yaml",
-    "docker.env.example", "requirements.txt",
+    "compose.write.yaml", "docker.env.example", "requirements.txt",
 }
 AUTHORED_DIRECTORIES = (
     ROOT / "docs",

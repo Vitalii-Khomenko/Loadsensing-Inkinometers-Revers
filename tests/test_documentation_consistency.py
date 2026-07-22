@@ -24,6 +24,7 @@ def test_documentation_entry_points_exist() -> None:
         "docs/gateway-feasibility.md",
         "Dockerfile",
         "compose.yaml",
+        "compose.write.yaml",
         "requirements.txt",
         "tests/test_language_policy.py",
         "captures/README.md",

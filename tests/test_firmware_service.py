@@ -1,8 +1,15 @@
 import binascii
+import hashlib
 
 import pytest
 
-from tools.firmware_service import FirmwareError, crc16_xmodem, send_xmodem
+import tools.firmware_service as firmware_service
+from tools.firmware_service import (
+    FirmwareError,
+    crc16_xmodem,
+    send_xmodem,
+    validate_firmware_file,
+)
 
 
 class FakeConnection:
@@ -45,3 +52,19 @@ def test_xmodem_matches_apk_probe_retries_blocks_and_eot():
 def test_xmodem_aborts_on_bootloader_cancel():
     with pytest.raises(FirmwareError, match="cancelled"):
         send_xmodem(FakeConnection(), FakeReader([0x18]), b"payload", apk_crc_probe_retries=0)
+
+
+def test_standalone_firmware_validation_accepts_only_exact_artifact(tmp_path, monkeypatch):
+    payload = b"validated-test-image"
+    path = tmp_path / firmware_service.G6_TIL90_FIRMWARE.name
+    path.write_bytes(payload)
+    monkeypatch.setattr(firmware_service, "G6_TIL90_SIZE", len(payload))
+    monkeypatch.setattr(
+        firmware_service, "G6_TIL90_SHA256", hashlib.sha256(payload).hexdigest()
+    )
+    manifest = validate_firmware_file(path)
+    assert manifest["size_bytes"] == len(payload)
+    assert manifest["version"] == "2.81"
+    path.write_bytes(payload + b"corrupt")
+    with pytest.raises(FirmwareError, match="size or SHA-256"):
+        validate_firmware_file(path)

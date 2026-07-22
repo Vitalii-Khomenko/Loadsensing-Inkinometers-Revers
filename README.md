@@ -30,6 +30,14 @@ docker compose up --build -d
 
 Open `http://127.0.0.1:8765/`, then connect the sensor. The default container remains read-only for sensor operations. Host UID/GID, permanent udev access, hotplug behavior, security controls, and validation commands are documented in `docs/docker-deployment.md`.
 
+An explicit write-mode override enables only the hardware-validated guarded workflows and requires the separately supplied, hash-validated firmware 2.81 binary:
+
+```bash
+docker compose -f compose.yaml -f compose.write.yaml up --build -d
+```
+
+Write mode still requires operation-specific confirmation, ACK/readback, backups, and rollback. It does not enable node-identity, calibration, arbitrary-packet, or arbitrary-firmware writes.
+
 ## Measurement axes and operating principle
 
 The physical `LS-G6-TIL90-I` reports three enabled angular channels: X, Y, and Z. A hardware-captured live response returned X `-2.4473°`, Y `2.8581°`, and Z `86.2360°` at `27.8 °C`. All three channels are enabled on the tested node. A controlled configuration trial temporarily disabled Z, produced an X/Y-only live result, and then restored all three axes with a zero-difference configuration comparison.

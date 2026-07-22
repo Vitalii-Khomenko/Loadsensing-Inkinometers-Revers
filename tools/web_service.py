@@ -295,7 +295,11 @@ def create_app(
             "restore": {
                 "implemented": [
                     "sampling", "channels", "radio_slot_time", "gateway_credentials",
-                    "factory_reset_and_restore", "firmware_2.81_recovery",
+                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+                ],
+                "hardware_validated_workflows": [
+                    "sampling", "channels", "radio_slot_time", "gateway_credentials",
+                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
                 ],
                 "hardware_validated": sorted(service.hardware_validated_writes),
                 "writes_enabled": service.writes_enabled,
@@ -628,6 +632,10 @@ def _parser() -> argparse.ArgumentParser:
         "--health-interval", type=int, default=60,
         help="automatic health-reading interval in seconds (default: 60)",
     )
+    parser.add_argument(
+        "--require-validated-firmware", action="store_true",
+        help="refuse startup unless the exact mapped firmware 2.81 file is mounted",
+    )
     return parser
 
 
@@ -635,6 +643,12 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if not _is_safe_bind_host(args.host):
         raise SystemExit("--host must be loopback or a wildcard Docker bind address")
+    if args.require_validated_firmware:
+        from tools.firmware_service import G6_TIL90_FIRMWARE, validate_firmware_file
+        try:
+            validate_firmware_file(ROOT / G6_TIL90_FIRMWARE)
+        except Exception as exc:
+            raise SystemExit(f"required firmware validation failed: {exc}") from exc
     app = create_app(
         DeviceService(args.serial_port, writes_enabled=args.enable_writes),
         database_path=args.database,

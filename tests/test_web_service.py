@@ -116,6 +116,18 @@ def test_destructive_web_operations_require_explicit_write_mode() -> None:
     assert flash.status_code == reset.status_code == gateway.status_code == 400
 
 
+def test_capabilities_list_only_validated_write_workflows() -> None:
+    client = TestClient(create_app(FakeDevice()))
+    restore = client.get("/api/capabilities").json()["restore"]
+    assert restore["hardware_validated_workflows"] == [
+        "sampling", "channels", "radio_slot_time", "gateway_credentials",
+        "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+    ]
+    assert restore["blocked"] == [
+        "calibration_write", "node_identity_write", "newer_firmware",
+    ]
+
+
 def test_readable_configuration_profiles_and_history_api() -> None:
     client = TestClient(create_app(FakeDevice()))
     token = client.get("/api/session").json()["token"]

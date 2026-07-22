@@ -833,6 +833,16 @@ Extended the existing serialized monitoring loop with explicit waiting, connecti
 
 Added a regression test for absent-to-present USB acquisition and fixed a history-resume race in which a job could already be marked paused while its previous worker was still leaving the finalization path. Automated validation now reports 82 passing tests, successful Python compilation, valid JavaScript syntax, and a valid Compose model.
 
+### 2026-07-22 — Explicit guarded Docker write mode added
+
+Status: container/API safety validation complete; next damaged-sensor session requires attended physical validation
+
+Added a separate `compose.write.yaml` override instead of weakening the default container. The override enables the existing web-service write gate and mounts only the exact local firmware 2.81 file as read-only evidence. The APK and extracted firmware remain absent from Git and the base image.
+
+The capability response now distinguishes all hardware-validated workflows: sampling, axes, gateway slot, gateway credentials, reboot, factory-reset restore, and exact firmware 2.81 reinstallation. Calibration, node identity, newer firmware, arbitrary firmware, and arbitrary packets remain unavailable. All operation-specific identity, confirmation, ACK/readback, backup, comparison, and rollback requirements remain enforced.
+
+Documented the Windows boundary from current Docker and Microsoft guidance: Docker Desktop has no direct USB passthrough, while WSL 2 can receive a USB device through `usbipd-win`. Native Linux remains the validated deployment; WSL 2 plus a Linux-visible ttyUSB device is a possible but not yet physically tested route.
+
 Updated the Linux udev template to request ModemManager exclusion. Added operator documentation for host UID/GID mapping, dialout access, start/stop/rebuild, persistence, rootless limitations, multiple-device ambiguity, and physical acceptance testing.
 
 Recovered the official application's version-aware node-ID path for documentation. It accepts a 20-bit value on recent firmware, verifies a health response at the new ID, and retains a legacy 16-bit branch. No second application command was found for rewriting serial, product, calibration identity, or a possible manufacturing fallback ID; deeper identity modification remains blocked pending an authorized service path and recovery-safe physical validation.

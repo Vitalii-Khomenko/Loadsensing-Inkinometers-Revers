@@ -32,7 +32,8 @@ def crc16_xmodem(data: bytes) -> int:
     return binascii.crc_hqx(data, 0)
 
 
-def validate_firmware(path: str | Path, device: dict[str, Any]) -> dict[str, Any]:
+def validate_firmware_file(path: str | Path) -> dict[str, Any]:
+    """Validate the immutable firmware artifact without touching a sensor."""
     firmware = Path(path)
     if not firmware.is_file():
         raise FirmwareError(f"firmware file does not exist: {firmware}")
@@ -42,6 +43,15 @@ def validate_firmware(path: str | Path, device: dict[str, Any]) -> dict[str, Any
         raise FirmwareError("firmware filename is not the APK-mapped G6 TIL90 image")
     if len(payload) != G6_TIL90_SIZE or digest != G6_TIL90_SHA256:
         raise FirmwareError("firmware size or SHA-256 does not match the APK inventory")
+    return {
+        "path": str(firmware), "filename": firmware.name, "size_bytes": len(payload),
+        "sha256": digest, "target_product_code": G6_TIL90_PRODUCT,
+        "version": "2.81", "block_count": (len(payload) + 127) // 128,
+    }
+
+
+def validate_firmware(path: str | Path, device: dict[str, Any]) -> dict[str, Any]:
+    manifest = validate_firmware_file(path)
     if device.get("product_code") != G6_TIL90_PRODUCT:
         raise FirmwareError("connected product is not the mapped G6 TIL90 product 0x4E")
     current = (device.get("firmware_major"), device.get("firmware_minor"))
@@ -49,11 +59,7 @@ def validate_firmware(path: str | Path, device: dict[str, Any]) -> dict[str, Any
         raise FirmwareError(
             f"connected firmware {current[0]}.{current[1]} does not match image 2.81"
         )
-    return {
-        "path": str(firmware), "filename": firmware.name, "size_bytes": len(payload),
-        "sha256": digest, "target_product_code": G6_TIL90_PRODUCT,
-        "version": "2.81", "block_count": (len(payload) + 127) // 128,
-    }
+    return manifest
 
 
 class _RawReader:
