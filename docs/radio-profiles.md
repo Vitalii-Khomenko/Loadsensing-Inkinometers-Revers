@@ -43,7 +43,7 @@ Node `101677` currently matches the embedded `EUROPE` template exactly for the p
 - enabled uplinks 868.1, 868.3, 868.5, 868.85, 869.05 and 869.525 MHz;
 - unused channel positions seven and eight are zero.
 
-Gateway-specific identity, network ID, password, address, reporting period and slot duration are not regional-profile constants. A profile match therefore does not recover the gateway password and is not sufficient authorization to rewrite the radio.
+Gateway-specific identity, network ID, password, address, reporting period and slot duration are not regional-profile constants. The browser can apply the physically validated embedded `EUROPE` radio-general and uplink-channel values while preserving those gateway-specific fields. It requires the connected product `0x4E`, derives an exact node-specific confirmation, verifies ACK and readback, and rolls back on failure. The other 19 profiles remain inspection-only because their complete write paths have not been physically validated on this sensor.
 
 ## Decompiler boundary
 

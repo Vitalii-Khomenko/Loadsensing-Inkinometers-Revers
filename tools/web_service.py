@@ -33,7 +33,11 @@ from tools.monitoring_service import MonitoringService
 from tools.monitoring_store import MonitoringStore
 from tools.usb_diagnostics import diagnose
 from tools.recovery_check import run_recovery_check
-from tools.radio_configuration import RadioConfigurationError, change_gateway_credentials
+from tools.radio_configuration import (
+    RadioConfigurationError,
+    apply_regional_profile,
+    change_gateway_credentials,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,6 +109,11 @@ class HistoryJobRequest(BaseModel):
 class GatewayCredentialsRequest(BaseModel):
     network_id: int = Field(ge=1, le=0xFFFFFFFF)
     password: SecretStr
+    confirmation: str
+
+
+class RegionalProfileRequest(BaseModel):
+    profile: str = Field(min_length=1, max_length=40)
     confirmation: str
 
 
@@ -295,11 +304,13 @@ def create_app(
             "restore": {
                 "implemented": [
                     "sampling", "channels", "radio_slot_time", "gateway_credentials",
-                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+                    "regional_profile_europe", "reboot", "factory_reset_and_restore",
+                    "firmware_2.81_recovery",
                 ],
                 "hardware_validated_workflows": [
                     "sampling", "channels", "radio_slot_time", "gateway_credentials",
-                    "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+                    "regional_profile_europe", "reboot", "factory_reset_and_restore",
+                    "firmware_2.81_recovery",
                 ],
                 "hardware_validated": sorted(service.hardware_validated_writes),
                 "writes_enabled": service.writes_enabled,
@@ -310,6 +321,25 @@ def create_app(
     @app.get("/api/radio-profiles")
     def radio_profiles() -> dict[str, Any]:
         return json.loads((ROOT / "analysis" / "protocol" / "radio_profiles.json").read_text())
+
+    @app.post("/api/radio/profile")
+    def regional_profile(
+        body: RegionalProfileRequest,
+        x_til90_token: str | None = Header(default=None),
+    ):
+        require_token(x_til90_token)
+        if not service.writes_enabled:
+            raise HTTPException(status_code=400, detail="hardware writes are disabled")
+        try:
+            result = apply_regional_profile(service, body.profile, body.confirmation)
+            return {
+                "status": result["status"],
+                "node_id": result["node_id"],
+                "profile": result["profile"],
+                "operations": result["operations"],
+            }
+        except (RadioConfigurationError, DeviceServiceError) as exc:
+            raise handle_error(exc) from exc
 
     @app.post("/api/radio/gateway-credentials")
     def gateway_credentials(

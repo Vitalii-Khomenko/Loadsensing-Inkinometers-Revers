@@ -36,7 +36,7 @@ An explicit write-mode override enables only the hardware-validated guarded work
 docker compose -f compose.yaml -f compose.write.yaml up --build -d
 ```
 
-Write mode still requires operation-specific confirmation, ACK/readback, backups, and rollback. It does not enable node-identity, calibration, arbitrary-packet, or arbitrary-firmware writes.
+Write mode still requires operation-specific confirmation, ACK/readback, backups, and rollback. It includes the hardware-validated embedded `EUROPE` regional profile while leaving every unvalidated regional profile blocked. It does not enable node-identity, calibration, arbitrary-packet, or arbitrary-firmware writes.
 
 ## Measurement axes and operating principle
 

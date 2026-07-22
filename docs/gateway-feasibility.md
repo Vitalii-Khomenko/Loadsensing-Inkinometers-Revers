@@ -136,4 +136,4 @@ Before our tooling transmits, identify the original project/gateway profile and 
 2. Export its supported configuration and record the software version using normal administration only.
 3. Decide whether the goal is local CMT Edge integration, CMT Cloud with a third-party LoRaWAN gateway, or complete independence.
 4. For complete independence, begin with receive-only over-air capture from a legally configured test node and gateway; do not start with gateway firmware modification.
-5. Add a radio-profile calculator to the local browser before allowing radio writes, showing MAC type, region, network-size bucket, calculated minimum period and regulatory warning.
+5. Keep non-EUROPE profile writes blocked until their MAC mapping, channel-group selection, gateway compatibility, regulatory constraints, and physical readback have been validated to the same standard as the embedded EUROPE workflow.

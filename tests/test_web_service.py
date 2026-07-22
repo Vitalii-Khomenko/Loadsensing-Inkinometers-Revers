@@ -70,6 +70,9 @@ def test_frontend_has_no_external_runtime_dependencies() -> None:
     assert "loadGatewayCredentials();" in script
     assert "saveGatewayCredentials(networkId,password)" in script
     assert "saved locally in this browser for the next sensor" in page
+    assert "Apply selected profile" in page
+    assert "APPLY PROFILE ${currentNodeId} ${p.name}" in script
+    assert 'api("/api/radio/profile"' in script
     assert "<pre" not in page
     assert "JSON.stringify(results" not in script
     assert "Waiting for the first automatic measurement" in page
@@ -120,7 +123,12 @@ def test_destructive_web_operations_require_explicit_write_mode() -> None:
         },
         headers=headers,
     )
-    assert flash.status_code == reset.status_code == gateway.status_code == 400
+    profile = client.post(
+        "/api/radio/profile",
+        json={"profile": "EUROPE", "confirmation": "APPLY PROFILE 101677 EUROPE"},
+        headers=headers,
+    )
+    assert flash.status_code == reset.status_code == gateway.status_code == profile.status_code == 400
 
 
 def test_capabilities_list_only_validated_write_workflows() -> None:
@@ -128,7 +136,8 @@ def test_capabilities_list_only_validated_write_workflows() -> None:
     restore = client.get("/api/capabilities").json()["restore"]
     assert restore["hardware_validated_workflows"] == [
         "sampling", "channels", "radio_slot_time", "gateway_credentials",
-        "reboot", "factory_reset_and_restore", "firmware_2.81_recovery",
+        "regional_profile_europe", "reboot", "factory_reset_and_restore",
+        "firmware_2.81_recovery",
     ]
     assert restore["blocked"] == [
         "calibration_write", "node_identity_write", "newer_firmware",

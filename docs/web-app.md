@@ -57,7 +57,7 @@ This switch does not expose arbitrary writes. It enables only physically validat
 - validate and reinstall the exact APK-mapped G6 TIL90 firmware 2.81 image;
 - run a guarded factory-reset, full backup-driven restore, reboot, and final configuration comparison;
 - preview all changes before write and require exact `RESTORE <node-id>` confirmation;
-- browse all 20 original Android radio profiles; regional profile editing remains separate from gateway credentials;
+- browse all 20 original Android radio profiles and apply the hardware-validated embedded `EUROPE` profile independently of gateway credentials; all other regional profiles remain inspection-only;
 - run persistent background measurement and health polling with configurable intervals and retention;
 - evaluate absolute X/Y/Z, rate-of-change, low-battery, sensor-error, and missing-data alerts locally;
 - preserve open, resolved, and acknowledged alert state across service restarts;
@@ -79,6 +79,7 @@ Hardware-confirmed on node `101677`, firmware `2.81`:
 - sampling interval write `82 + uint24 seconds`, tested as `300 → 301 → 300`;
 - channel flags write `9A + flags`, tested with identical state, temporary Z disable, X/Y-only live result and all-axis restore;
 - gateway radio-slot write `90 + uint16 seconds`, tested as `3000 → 3001 → 3000`;
+- embedded `EUROPE` radio-general and six-channel uplink restoration, validated during the complete post-reset restore and protected by ACK, readback, preserved gateway fields, and rollback;
 - every write returned response code `0x0000`, readback matched and the final configuration diff was empty.
 
 The measurement interval and gateway slot are deliberately separate controls. The first determines ordinary measurement/storage periodicity. The second is the radio network's send-slot parameter used to distribute transmissions. It is not an independent promise that the gateway receives a packet at that exact wall-clock interval; values must remain compatible with the configured gateway/network plan.
@@ -86,7 +87,7 @@ The measurement interval and gateway slot are deliberately separate controls. Th
 Still blocked:
 
 - calibration and node-identity changes;
-- arbitrary regional-profile editing and arbitrary firmware files;
+- every regional profile except the hardware-validated embedded `EUROPE` profile, plus arbitrary firmware files;
 - firmware newer than 2.81 because no newer mapped normal G6 image is present;
 - RF receipt verification until a gateway is available.
 

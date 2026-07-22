@@ -72,6 +72,18 @@ Rebuild after pulling new source:
 docker compose up --build -d
 ```
 
+## Automatic start after a Linux reboot
+
+`compose.yaml` sets `restart: unless-stopped`. Once the container has been created with `docker compose up -d`, Docker starts that same container automatically after a host reboot. Ensure the Docker daemon itself is enabled:
+
+```bash
+sudo systemctl enable --now docker
+systemctl is-enabled docker
+docker compose ps
+```
+
+A container removed with `docker compose down`, or deliberately stopped by the operator, must be started again with the appropriate Compose command. A write-mode container created with both Compose files retains that write-mode command when Docker restarts it. On a VMware host, USB attachment to the Linux guest may still need to be restored separately after reboot even though the web service is already running.
+
 ## Explicit write mode
 
 The base Compose service is deliberately read-only for sensor operations. The repository includes the exact hardware-tested `firmware/LSG_TIL90_v2_81.bin` recovery image, and Docker copies it into the image during the build. The service accepts it only when it is exactly 124288 bytes with SHA-256:
@@ -91,11 +103,12 @@ The header must show **Writes enabled**. This mode exposes only the hardware-val
 - sampling interval and X/Y/Z enable flags;
 - gateway radio-slot time;
 - embedded gateway credentials;
+- the embedded `EUROPE` regional profile, with gateway-specific fields preserved;
 - verified reboot;
 - factory reset followed by backup-driven restore and reboot;
 - reinstallation of the exact firmware 2.81 image.
 
-Every operation retains its identity checks, exact confirmation phrase, acknowledgement/readback, post-operation comparison, and rollback or recovery boundary. Automatic monitoring never writes. Calibration, node identity, newer or arbitrary firmware, arbitrary UART packets, and unvalidated radio changes remain blocked.
+Every operation retains its identity checks, exact confirmation phrase, acknowledgement/readback, post-operation comparison, and rollback or recovery boundary. Automatic monitoring never writes. Calibration, node identity, newer or arbitrary firmware, arbitrary UART packets, and all unvalidated regional profiles remain blocked.
 
 Before work on a damaged sensor, preserve a readable configuration backup and the write-only gateway password whenever the node still responds. The validated factory-reset recovery requires both. Exact-image firmware reinstallation also performs target identity and current-configuration checks; it is not a blind flash path for a completely unresponsive or unidentified board.
 
