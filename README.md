@@ -1,6 +1,6 @@
 # TIL90 Reverse Engineering
 
-Last updated: 2026-07-19
+Last updated: 2026-07-22
 
 This repository documents a safety-first reverse engineering effort for a Worldsensing Loadsensing TIL90 sensor. Static analysis, direct Linux reads, monitoring, history, guarded configuration, gateway credentials, factory-reset recovery, and firmware 2.81 reinstallation are implemented. Calibration and node-ID writes remain blocked.
 
@@ -19,6 +19,16 @@ This repository documents a safety-first reverse engineering effort for a Worlds
 - The physical node passed an exact-image firmware 2.81 reflash, factory reset, complete backup-driven restoration with new gateway credentials, reboot, and a final zero-difference configuration comparison.
 
 Start with `docs/README.md`. The first hardware evidence is under `captures/reference_sessions/2026-07-15T103257Z/`; the post-gateway-configuration comparison is under `captures/reference_sessions/2026-07-15T161221Z-post-gateway-config/`.
+
+## Docker quick start
+
+On a native Linux Docker host, the container can start before USB is connected, wait for one CP2102N TIL90, acquire X/Y/Z automatically, persist results, and reconnect after unplug/replug:
+
+```bash
+docker compose up --build -d
+```
+
+Open `http://127.0.0.1:8765/`, then connect the sensor. The default container remains read-only for sensor operations. Host UID/GID, permanent udev access, hotplug behavior, security controls, and validation commands are documented in `docs/docker-deployment.md`.
 
 ## Measurement axes and operating principle
 
@@ -50,6 +60,8 @@ Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` a
 | `Goal.md` | Full project specification and safety stages | Authoritative scope |
 | `ROADMAP.md` | Dated English progress log and next gate | Authoritative status |
 | `docs/multi-sensor-wired.md` | Proposed ten-sensor wired Linux architecture and test plan | Design complete; implementation pending |
+| `docs/docker-deployment.md` | Container build, Linux USB hotplug, automatic acquisition, and operation | Smoke-tested without hardware |
+| `docs/node-identity.md` | Protocol node ID, factory identity, reset behavior, and safety boundary | Static-confirmed; write blocked |
 | `docs/README.md` | Documentation index and evidence labels | Current navigation |
 | `docs/protocol.md` | Consolidated protocol summary | Current technical summary |
 | `analysis/protocol/*.csv` | Machine-readable protocol registries | Static-analysis output |

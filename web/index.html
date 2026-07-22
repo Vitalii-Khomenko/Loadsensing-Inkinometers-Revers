@@ -40,14 +40,14 @@
         <article class="metric"><span>Measurements</span><strong id="sampling-summary">—</strong><small id="slot-summary">Gateway slot: —</small></article>
       </section>
       <div class="grid">
-        <article class="panel"><p class="kicker">LATEST MEASUREMENT</p><h2>Tilt</h2><div id="overview-reading" class="axis-cards empty">Select “Take measurement”</div><button data-read="live" class="primary">Take measurement</button></article>
+        <article class="panel"><p class="kicker">LATEST MEASUREMENT</p><h2>Tilt</h2><div id="overview-reading" class="axis-cards empty">Waiting for the first automatic measurement</div><button data-read="live" class="primary">Take measurement</button></article>
         <article class="panel"><p class="kicker">READ RESULTS</p><h2>Summary</h2><div id="readable-results" class="readable-results empty">No data has been read yet.</div></article>
       </div>
     </section>
 
     <section id="tab-measurements" class="tab-page">
       <article class="panel chart-panel">
-        <div class="section-head"><div><p class="kicker">LIVE USB</p><h2>X / Y / Z chart</h2><p class="muted">One acquisition takes about 10 seconds. The next request starts only after the previous one completes.</p></div>
+        <div class="section-head"><div><p class="kicker">LIVE USB</p><h2>X / Y / Z chart</h2><p class="muted">Docker monitoring starts automatically, waits for USB, and resumes after a disconnect. Manual requests remain serialized with background acquisition.</p></div>
           <div class="actions"><button id="live-once" class="primary">Take once</button><button id="live-start">Continuous</button><button id="live-stop" disabled>Stop</button></div></div>
         <canvas id="chart" width="1000" height="340" aria-label="Tilt chart"></canvas>
         <div id="latest" class="legend">No measurements</div>

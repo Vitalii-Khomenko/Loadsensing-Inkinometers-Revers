@@ -1,0 +1,32 @@
+services:
+  til90:
+    build:
+      context: .
+    image: loadsensing-til90:local
+    restart: unless-stopped
+    init: true
+    user: "${TIL90_UID:-1000}:${TIL90_GID:-1000}"
+    group_add:
+      - "${TIL90_DIALOUT_GID:-20}"
+    ports:
+      - "127.0.0.1:${TIL90_HTTP_PORT:-8765}:8765"
+    volumes:
+      - type: bind
+        source: /dev
+        target: /dev
+        bind:
+          propagation: rslave
+      - type: bind
+        source: ./data
+        target: /app/data
+    device_cgroup_rules:
+      - "c 188:* rwm"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 15s
+

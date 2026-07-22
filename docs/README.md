@@ -1,6 +1,6 @@
 # Documentation Index
 
-Last updated: 2026-07-15
+Last updated: 2026-07-22
 
 Evidence labels used in this project:
 
@@ -23,6 +23,8 @@ Evidence labels used in this project:
 | `cli-usage.md` | Safe Linux CLI commands and serial prerequisites | Implemented and hardware-tested |
 | `maintenance-cli.md` | Reboot, rollback validation, factory reset, post-reset restore, and firmware recovery commands | Hardware-confirmed on node 101677 |
 | `web-app.md` | Local browser UI, monitoring, alerts, resumable history, USB diagnostics, backup/restore, and security boundary | Implemented; write subset hardware-tested |
+| `docker-deployment.md` | Linux Docker build, USB hotplug, automatic monitoring, persistence, and security | Container smoke-tested without hardware |
+| `node-identity.md` | Writable protocol node ID versus factory identity and deeper-change boundary | Static-confirmed; physical node-ID change blocked |
 | `monitoring-and-alerts.md` | SQLite schema, acquisition flow, alert lifecycle, scheduling, and operational limits | Implemented and synthetic-tested |
 | `smartphone-connection-recovery.md` | APK USB flow, phone/Linux troubleshooting, read-only recovery, reset and firmware boundaries | Static-confirmed and implemented where safe |
 | `remaining-work.md` | Preserved backlog, required evidence, gateway dependencies, and productization work | Current backlog |

@@ -41,6 +41,17 @@ class HistoryManager:
         if job["status"] == "complete":
             return job
         with self._lock:
+            finishing_thread = (
+                self._thread
+                if self._active_job_id == job_id
+                and self._thread
+                and self._thread.is_alive()
+                and job["status"] == "paused"
+                else None
+            )
+        if finishing_thread:
+            finishing_thread.join(1)
+        with self._lock:
             if self._thread and self._thread.is_alive():
                 if self._active_job_id == job_id:
                     return job
@@ -112,4 +123,3 @@ class HistoryManager:
         finally:
             with self._lock:
                 self._active_job_id = None
-

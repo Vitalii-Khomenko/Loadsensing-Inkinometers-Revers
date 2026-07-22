@@ -1,5 +1,6 @@
 import time
 
+import tools.monitoring_service as monitoring_module
 from tools.alert_engine import evaluate_health, evaluate_sample
 from tools.history_manager import HistoryManager
 from tools.monitoring_service import MonitoringService
@@ -68,6 +69,64 @@ def test_monitor_ingests_health_and_evaluates_low_battery(tmp_path):
     monitor.ingest([health(battery=2.9)])
     assert store.summary()["health_count"] == 1
     assert store.alerts("open")[0]["rule"] == "low_battery"
+
+
+class DetectedDevice:
+    def status(self):
+        return {
+            "device_detected": True,
+            "selected_port": "/dev/serial/by-id/fake-CP2102N",
+        }
+
+
+def test_monitor_status_exposes_connection_and_latest_records(tmp_path):
+    store = MonitoringStore(tmp_path / "monitor.sqlite3")
+    store.insert_record(record(), "live")
+    store.insert_record(health(), "live")
+    monitor = MonitoringService(DetectedDevice(), store)
+    status = monitor.status()
+    assert status["connection_state"] == "connecting"
+    assert status["device"]["device_detected"]
+    assert status["latest_sample"]["x_deg"] == 1.0
+    assert status["latest_health"]["battery_v"] == 3.2
+    store.close()
+
+
+class HotplugDevice:
+    def __init__(self):
+        self.present = False
+
+    def status(self):
+        return {"device_detected": self.present, "selected_port": "/dev/fake"}
+
+    def read(self, selection):
+        if not self.present:
+            raise OSError("USB sensor is absent")
+        timestamp = int(time.time())
+        return [record(timestamp) if selection == "live" else health(timestamp)]
+
+
+def test_monitor_waits_for_hotplug_and_acquires_without_restart(tmp_path, monkeypatch):
+    monkeypatch.setattr(monitoring_module, "RECONNECT_RETRY_SECONDS", 0.01)
+    store = MonitoringStore(tmp_path / "monitor.sqlite3")
+    device = HotplugDevice()
+    monitor = MonitoringService(device, store)
+    config = monitor.config()
+    config["enabled"] = True
+    store.set_monitor_config(config)
+    monitor.start()
+    deadline = time.monotonic() + 1
+    while monitor.status()["last_error"] is None and time.monotonic() < deadline:
+        time.sleep(0.005)
+    assert monitor.status()["connection_state"] == "waiting"
+    device.present = True
+    deadline = time.monotonic() + 1
+    while store.summary()["sample_count"] == 0 and time.monotonic() < deadline:
+        time.sleep(0.005)
+    monitor.stop()
+    assert store.summary()["sample_count"] == 1
+    assert monitor.status()["connection_state"] == "connected"
+    store.close()
 
 
 class HistoryDevice:

@@ -11,8 +11,9 @@ TEXT_SUFFIXES = {
     ".py", ".toml", ".txt", ".yaml", ".yml",
 }
 AUTHORED_ROOT_FILES = {
-    "AGENTS.md", "APK-Info.md", "Command.md", "Goal.md", "README.md",
-    "ROADMAP.md", "StartCommands.md", "requirements.txt",
+    ".dockerignore", "AGENTS.md", "APK-Info.md", "Command.md", "Dockerfile",
+    "Goal.md", "README.md", "ROADMAP.md", "StartCommands.md", "compose.yaml",
+    "docker.env.example", "requirements.txt",
 }
 AUTHORED_DIRECTORIES = (
     ROOT / "docs",

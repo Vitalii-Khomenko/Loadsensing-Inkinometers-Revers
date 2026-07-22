@@ -128,8 +128,20 @@ def _is_loopback_host(value: str) -> bool:
         return False
 
 
+def _is_safe_bind_host(value: str) -> bool:
+    """Allow loopback locally and wildcard binding behind a loopback Docker port."""
+    if value in {"0.0.0.0", "::", "[::]"}:
+        return True
+    return _is_loopback_host(value)
+
+
 def create_app(
-    device: DeviceService | None = None, *, database_path: str | Path | None = None
+    device: DeviceService | None = None,
+    *,
+    database_path: str | Path | None = None,
+    auto_monitor: bool = False,
+    measurement_interval_seconds: int = 10,
+    health_interval_seconds: int = 60,
 ) -> FastAPI:
     service = device or DeviceService()
     store = MonitoringStore(
@@ -138,6 +150,15 @@ def create_app(
     monitor = MonitoringService(service, store)
     history_manager = HistoryManager(service, store)
     token = secrets.token_urlsafe(32)
+
+    if auto_monitor:
+        automatic_config = monitor.config()
+        automatic_config.update({
+            "enabled": True,
+            "measurement_interval_seconds": measurement_interval_seconds,
+            "health_interval_seconds": health_interval_seconds,
+        })
+        store.set_monitor_config(MonitoringService.validate_config(automatic_config))
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -595,16 +616,31 @@ def _parser() -> argparse.ArgumentParser:
         "--enable-writes", action="store_true",
         help="enable only hardware-validated restore operations; still requires exact confirmation",
     )
+    parser.add_argument(
+        "--auto-monitor", action="store_true",
+        help="start persistent monitoring and reconnect automatically when USB appears",
+    )
+    parser.add_argument(
+        "--measurement-interval", type=int, default=10,
+        help="automatic live-reading interval in seconds (default: 10)",
+    )
+    parser.add_argument(
+        "--health-interval", type=int, default=60,
+        help="automatic health-reading interval in seconds (default: 60)",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if not _is_loopback_host(args.host):
-        raise SystemExit("--host must be a loopback address (127.0.0.1, ::1, or localhost)")
+    if not _is_safe_bind_host(args.host):
+        raise SystemExit("--host must be loopback or a wildcard Docker bind address")
     app = create_app(
         DeviceService(args.serial_port, writes_enabled=args.enable_writes),
         database_path=args.database,
+        auto_monitor=args.auto_monitor,
+        measurement_interval_seconds=args.measurement_interval,
+        health_interval_seconds=args.health_interval,
     )
     uvicorn.run(app, host=args.host, port=args.port, access_log=False)
     return 0

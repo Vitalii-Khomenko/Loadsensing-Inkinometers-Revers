@@ -11,6 +11,9 @@ from tools.alert_engine import evaluate_health, evaluate_missing_data, evaluate_
 from tools.monitoring_store import DEFAULT_MONITOR_CONFIG, MonitoringStore
 
 
+RECONNECT_RETRY_SECONDS = 2
+
+
 class MonitoringService:
     """Poll live and health data without overlapping other serial transactions."""
 
@@ -74,13 +77,26 @@ class MonitoringService:
 
     def status(self) -> dict[str, Any]:
         thread = self._thread
+        device_status = self.device.status()
+        if not device_status.get("device_detected"):
+            connection_state = "waiting"
+        elif self._last_error:
+            connection_state = "retrying"
+        elif self._last_success_utc:
+            connection_state = "connected"
+        else:
+            connection_state = "connecting"
         return {
             "running": bool(thread and thread.is_alive() and not self._stop.is_set()),
+            "connection_state": connection_state,
+            "device": device_status,
             "config": self.config(),
             "last_success_utc": self._last_success_utc,
             "last_error": self._last_error,
             "next_measurement_epoch": self._next_measurement_epoch,
             "next_health_epoch": self._next_health_epoch,
+            "latest_sample": self.store.latest_sample(),
+            "latest_health": self.store.latest_health(),
             "storage": self.store.summary(),
         }
 
@@ -134,6 +150,8 @@ class MonitoringService:
                     self._last_success_utc, self._last_error = utc_now(), None
             except Exception as exc:
                 self._last_error = f"{type(exc).__name__}: {exc}"
-                next_measurement = max(next_measurement, time.time() + 15)
-                next_health = max(next_health, time.time() + 15)
-            self._stop.wait(1)
+                next_measurement = max(
+                    next_measurement, time.time() + RECONNECT_RETRY_SECONDS
+                )
+                next_health = max(next_health, time.time() + RECONNECT_RETRY_SECONDS)
+            self._stop.wait(min(1, RECONNECT_RETRY_SECONDS))

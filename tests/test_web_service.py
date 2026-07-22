@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 import time
 
-from tools.web_service import create_app
+from tools.web_service import _is_safe_bind_host, create_app
 from tests.test_config_backup import sample_snapshot
 
 
@@ -65,6 +65,27 @@ def test_frontend_has_no_external_runtime_dependencies() -> None:
     assert "Replace network ID and password" in page
     assert "<pre" not in page
     assert "JSON.stringify(results" not in script
+    assert "Waiting for the first automatic measurement" in page
+    assert "refreshAutomaticStatus" in script
+
+
+def test_docker_bind_and_automatic_monitor_defaults(tmp_path) -> None:
+    assert _is_safe_bind_host("0.0.0.0")
+    assert _is_safe_bind_host("::")
+    assert _is_safe_bind_host("127.0.0.1")
+    assert not _is_safe_bind_host("192.0.2.1")
+    client = TestClient(create_app(
+        FakeDevice(), database_path=tmp_path / "data.sqlite3",
+        auto_monitor=True, measurement_interval_seconds=10, health_interval_seconds=60,
+    ))
+    token = client.get("/api/session").json()["token"]
+    monitor = client.post(
+        "/api/monitor/status", headers={"X-TIL90-Token": token}
+    ).json()
+    assert monitor["config"]["enabled"]
+    assert monitor["config"]["measurement_interval_seconds"] == 10
+    assert monitor["config"]["health_interval_seconds"] == 60
+    assert monitor["connection_state"] == "connecting"
 
 
 def test_destructive_web_operations_require_explicit_write_mode() -> None:

@@ -822,3 +822,17 @@ Evidence is under `captures/reference_sessions/2026-07-15T180007Z-reset-firmware
 Status: completed
 
 Added `reports/localized/TIL90_Project_Report_DE.md`, a deliberately non-technical German summary for colleagues. It explains the project objective, completed sensor and web-console capabilities, physically validated reset/restore and firmware recovery, operational benefits, remaining limitations, and future gateway/multi-sensor opportunities. Added a narrow repository-language exception for explicitly requested localized stakeholder reports; all code, UI, technical documentation, tests, filenames, and roadmap content remain English.
+
+### 2026-07-22 — Docker USB hotplug and automatic web acquisition completed
+
+Status: image and no-hardware runtime smoke validation complete; physical hotplug validation pending sensor connection
+
+Added a Python 3.13 Docker image and hardened Compose deployment. The service binds only to host loopback, drops all Linux capabilities, enables `no-new-privileges`, keeps the root filesystem read-only, persists SQLite under `data/`, and grants ttyUSB major `188` without using privileged mode. A strict Docker context excludes APK archives, extracted/decompiled evidence, captures, runtime databases, and test caches.
+
+Extended the existing serialized monitoring loop with explicit waiting, connecting, connected, and retrying states plus latest sample/health publication. Container startup enables ten-second live reads and sixty-second health reads. The browser polls this state, updates the connection indicator, and renders new X/Y/Z data automatically. The process remains healthy when no CP2102N exists and retries after later hotplug or a serial disconnect.
+
+Added a regression test for absent-to-present USB acquisition and fixed a history-resume race in which a job could already be marked paused while its previous worker was still leaving the finalization path. Automated validation now reports 82 passing tests, successful Python compilation, valid JavaScript syntax, and a valid Compose model.
+
+Updated the Linux udev template to request ModemManager exclusion. Added operator documentation for host UID/GID mapping, dialout access, start/stop/rebuild, persistence, rootless limitations, multiple-device ambiguity, and physical acceptance testing.
+
+Recovered the official application's version-aware node-ID path for documentation. It accepts a 20-bit value on recent firmware, verifies a health response at the new ID, and retains a legacy 16-bit branch. No second application command was found for rewriting serial, product, calibration identity, or a possible manufacturing fallback ID; deeper identity modification remains blocked pending an authorized service path and recovery-safe physical validation.

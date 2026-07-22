@@ -1,5 +1,7 @@
 # TIL90 Local Browser Console
 
+For an always-on Linux deployment with USB hotplug and automatic acquisition, use `compose.yaml` as described in `docker-deployment.md`. The container starts monitoring in read-only mode, stays healthy without a sensor, and publishes the latest stored sample to the page after the device appears.
+
 Last updated: 2026-07-15
 
 The browser application is a local interface around the tested Python protocol implementation. It binds to loopback, talks directly to the CP2102N USB serial adapter, and does not need a phone, gateway, cloud account, or internet connection.
