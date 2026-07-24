@@ -1,6 +1,6 @@
 # Remaining Work Register
 
-Last updated: 2026-07-15
+Last updated: 2026-07-24
 
 This register preserves work that is useful but not yet complete. Completion claims remain in `ROADMAP.md`; safety prerequisites remain authoritative in `write-validation-gates.md`.
 
@@ -20,12 +20,17 @@ This register preserves work that is useful but not yet complete. Completion cla
 
 ## Work requiring a gateway or official project access
 
-- confirm USB/Ethernet services and supported local export on the exact gateway model;
+- physically validate RJ45 addressing and the authenticated HTTPS CSV routes already proven over USB local access;
+- configure an operator-owned FTPS endpoint and measure upload cadence, retry, duplicate, backlog, and reconnection behavior;
+- capture the local MQTT schema and compare each message against the gateway CSV source;
+- obtain the official TIL90 Modbus register map before enabling wired-only Modbus TCP;
+- disable the internet watchdog, provide local time synchronization, and complete an attended no-internet acceptance test;
 - correlate sensor transmission, gateway receipt, decoded values, timestamps, and sequence/capture IDs;
 - validate gateway slot semantics under the real network size and reporting plan;
 - determine the Android wizard state that locks shorter sampling choices;
 - test link check/coverage only with site authorization and controlled RF logging;
-- evaluate a supported local gateway/API path that avoids cloud dependency without bypassing credentials.
+
+The physical `LS-G6-KIO-GW-868` gateway now confirms the supported local architecture. It stores decoded TIL90 readings, serves current TIL90 and health CSV files over authenticated HTTPS, and exposes disabled-by-default FTP/FTPS, MQTT, and Modbus TCP integrations. The gateway web administrator account does not grant SSH access. See `gateway-local-export.md`.
 
 ## Persistent writes still blocked
 

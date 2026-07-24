@@ -1,6 +1,6 @@
 # Gateway Feasibility Notes
 
-Last updated: 2026-07-15
+Last updated: 2026-07-24
 
 ## Short answer
 
@@ -107,6 +107,16 @@ Worldsensing states that CMT Edge keeps collected data in the gateway, works wit
 The 4G Rugged Gateway specification lists USB-C for `local access` and 5 V power, but it does not document USB-C as a continuous raw-measurement serial stream. USB must therefore not be assumed to be the integration interface. Ethernet plus a documented CMT Edge export is the preferred path. The exact gateway model, Edge/Cloud variant, software version, license and enabled exports must be identified before implementation.
 
 A Cloud-only gateway may be configured primarily as a packet forwarder to a remote network server. Whether it can provide local decoded data cannot be inferred from the presence of USB or Ethernet; that depends on its product variant and installed software. Replacing its configured server or firmware is not necessary when an Edge gateway or an independent, legitimately provisioned LoRaWAN gateway is available.
+
+### Physical gateway result
+
+The gateway-dependent uncertainty was materially reduced on 2026-07-24. The connected unit identified as `LS-G6-KIO-GW-868`, CMT/Data Server `2.11.1`, platform G6 Edge, radio network `31253`, and region `Europe`. USB local access appeared as an ASIX Ethernet adapter with gateway address `169.254.0.1`. The authenticated web interface exposed 12 registered `LS-G6-TIL90-I` nodes running firmware 2.81 and retained decoded readings even though all nodes were offline at the inspection time.
+
+A real TIL90 CSV was downloaded locally over HTTPS. The gateway also exposed an outbound FTP/FTPS client, outbound MQTT pusher, and Modbus TCP gateway. All three optional exports were disabled and were not changed. The FTP page provides independent TIL90 and health paths plus append, unique-file, and overwrite policies. MQTT accepts a local broker, topic, TLS material, and credentials. Modbus can be limited to wired interfaces and maps nodes to Unit IDs.
+
+SSH is present as OpenSSH 7.5, but the validated web administrator credentials were rejected for both the `admin` and `root` SSH accounts. No bypass was attempted, and SSH is not necessary for supported local export.
+
+The exact evidence, endpoint patterns, offline network requirements, credential separation, and acceptance plan are documented in `gateway-local-export.md`.
 
 ## Can an existing Worldsensing gateway be reconfigured?
 

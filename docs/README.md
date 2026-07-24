@@ -1,6 +1,6 @@
 # Documentation Index
 
-Last updated: 2026-07-22
+Last updated: 2026-07-24
 
 Evidence labels used in this project:
 
@@ -31,6 +31,8 @@ Evidence labels used in this project:
 | `remaining-work.md` | Preserved backlog, required evidence, gateway dependencies, and productization work | Current backlog |
 | `android-feature-parity.md` | Android function map and explanation of 10-second local reads versus radio reporting limits | Static-confirmed; implementation roadmap |
 | `gateway-feasibility.md` | Edge versus LoRaWAN gateway options, difficulty, dependencies, and regional safety | Static analysis plus official product references |
+| `gateway-local-export.md` | Physical Edge gateway identity, SSH result, local CSV evidence, FTP/FTPS, MQTT, Modbus, Ethernet-only design, and acceptance plan | Physical read-only gateway validation |
+| `../config/gateway-local.example.yaml` | Non-secret offline gateway, collector transport, address, credential-variable, and 200-sensor capacity template | Planning template; not applied |
 | `multi-sensor-wired.md` | Ten-sensor USB topology, identity safeguards, concurrent reads, and validation plan | Architecture documented; implementation pending |
 | `radio.md` | Physical G6 radio values, gateway model, and password boundary | Hardware-confirmed |
 | `radio-profiles.md` | All 20 original Android regional profiles and the current sensor match | Static-confirmed; current EUROPE match hardware-confirmed |

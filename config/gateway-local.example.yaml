@@ -1,0 +1,103 @@
+schema_version: 1
+status: planning-template
+
+gateway:
+  expected_model: LS-G6-KIO-GW-868
+  expected_software_version: 2.11.1
+  expected_network_id: 31253
+  expected_region: Europe
+
+management:
+  usb_url: https://169.254.0.1/dataserver/
+  ethernet_url: https://192.168.50.1/dataserver/
+  username_environment_variable: LOADSENSING_GATEWAY_USERNAME
+  password_environment_variable: LOADSENSING_GATEWAY_PASSWORD
+  tls:
+    require_validation: true
+    ca_file_environment_variable: LOADSENSING_GATEWAY_CA_FILE
+
+local_network:
+  example_only: true
+  gateway_address: 192.168.50.1
+  computer_address: 192.168.50.2
+  prefix_length: 24
+  addressing: static
+  internet_egress: blocked_by_router_firewall_or_isolated_vlan
+  network_watchdog_enabled: false
+  remote_tunnel_enabled: false
+  cellular_policy: sim_removed_or_service_disabled
+  ntp_server: 192.168.50.2
+  smtp_policy: disabled_or_local_only
+
+collector:
+  live_transport: mqtt
+  archive_transport: ftps
+  reconciliation_transport: https_csv
+  deduplication_fields:
+    - node_id
+    - measurement_timestamp
+    - message_type
+
+mqtt:
+  enabled_on_gateway: false
+  broker_host: 192.168.50.2
+  broker_port: 8883
+  topic: loadsensing/31253/readings
+  tls_required: true
+  username_environment_variable: LOADSENSING_MQTT_USERNAME
+  password_environment_variable: LOADSENSING_MQTT_PASSWORD
+
+ftps:
+  enabled_on_gateway: false
+  server_host: 192.168.50.2
+  server_port: 21
+  validate_server_certificate: true
+  output_policy: append
+  til90_path: /loadsensing/til90/
+  health_path: /loadsensing/health/
+  username_environment_variable: LOADSENSING_FTPS_USERNAME
+  password_environment_variable: LOADSENSING_FTPS_PASSWORD
+
+https_csv:
+  reading_path: /dataserver/current/reading/{node_id}/til90/{node_id}-readings-current.csv
+  health_path: /dataserver/current/health/{node_id}/health/{node_id}-health-current.csv
+  inventory_path: /dataserver/api/v1/inventory/networks/{network_id}
+
+capacity:
+  planned_sensor_count: 200
+  published_single_edge_upper_bound_messages_per_minute: 30
+  initial_design_utilization_fraction: 0.5
+  initial_reporting_period_minutes: 15
+  five_minute_reporting_messages_per_minute: 40.0
+  ten_minute_reporting_messages_per_minute: 20.0
+  fifteen_minute_reporting_messages_per_minute: 13.33
+  sixty_minute_reporting_messages_per_minute: 3.33
+  physical_load_test_required: true
+
+downlink:
+  enabled_on_observed_gateway: true
+  confirmed_categories:
+    - node_time
+    - reporting_period
+    - spreading_factor
+    - model_specific_sensor_configuration
+  reporting_period_bulk_selection: true
+  pending_reporting_period_cancellation: true
+  network_migration_broadcast_confirmed: false
+  sensor_firmware_update_confirmed: false
+  sensor_reboot_confirmed: false
+  sensor_factory_reset_confirmed: false
+
+gateway_replacement:
+  preferred_method: preserve_radio_network
+  required_matching_fields:
+    - region
+    - frequency_plan
+    - network_id
+    - radio_password
+  old_gateway_policy: power_off_or_disable_downlink
+  different_radio_network_requires_per_sensor_provisioning: true
+
+secrets:
+  store_in_repository: false
+  storage: docker_secrets_or_host_secret_store

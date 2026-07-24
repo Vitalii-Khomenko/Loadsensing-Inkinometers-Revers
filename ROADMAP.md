@@ -862,3 +862,27 @@ Added the dedicated **Deep diagnostics** browser tab and `tools/deep_diagnostics
 The physical Docker run completed in 62.44 seconds with 5/5 health, 5/5 identity, 13/13 independently evaluated groups, 5/5 measurements, zero sensor error codes, zero framing errors, quiet passive bootloader status, and a normally completed 77-record history response. It classified the healthy sensor as `sensor_responsive_phone_or_app_likely` and reported `persistent_writes_sent: 0`.
 
 The final automated suite reports 95 passing tests, successful Python compilation, valid JavaScript syntax, a valid write-mode Compose model, a healthy auto-restarting container, and working JSON/CSV diagnostic downloads.
+
+### 2026-07-24 — Physical Edge gateway and local export path validated
+
+Status: read-only gateway inspection complete; Ethernet-only export activation pending
+
+Connected a physical Worldsensing gateway through its USB local-access interface. Linux enumerated an ASIX network adapter, assigned `169.254.0.5/16`, and reached the gateway at `169.254.0.1`. The authenticated CMT Edge interface identified `LS-G6-KIO-GW-868`, Data Server 2.11.1, radio network 31253, region Europe, enabled downlink, and 12 registered `LS-G6-TIL90-I` nodes running firmware 2.81.
+
+Confirmed that retained TIL90 data remains locally accessible while the nodes are offline. Downloaded a real current TIL90 CSV over authenticated HTTPS and verified timestamp, temperature, X/Y/Z tilt, and per-axis standard-deviation columns. Read-only inventory endpoints and per-node health CSV routes were also identified.
+
+Inspected the supported outbound integrations without changing them. FTP/FTPS provides per-family paths for TIL90 readings and health plus append, unique-file, and overwrite policies. MQTT accepts a local broker, topic, TLS material, and authentication. Modbus TCP can be restricted to wired interfaces, maps nodes to Unit IDs, and returns the latest value until its configured timeout. FTP, MQTT, and Modbus were all disabled; TCP 21, 502, 1883, and 8883 were not exposed as local servers.
+
+TCP 22 identifies as OpenSSH 7.5. The validated web administrator credentials were rejected by SSH for both `admin` and one standard `root` check. No guessing or bypass was attempted. The web account, embedded radio password, and export-server credentials are separate security domains.
+
+Documented the cloud-independent design and safety gates in `docs/gateway-local-export.md`. The gateway's enabled internet watchdog must be disabled before an intentional offline deployment, static RJ45 addressing or a local DHCP service must be provided, and local NTP should replace public NTP. The next attended validation will connect RJ45, prove HTTPS CSV access, configure an operator-owned FTPS target, compare exported rows, then remove internet access and observe at least one complete sensor reporting cycle.
+
+No gateway configuration, radio parameter, sensor registry, export setting, reboot, firmware, or repository secret was changed during the physical investigation.
+
+Extended the gateway record with exact offline controls and a non-secret `config/gateway-local.example.yaml` planning template. On Data Server 2.11.1 the network watchdog, backhaul selection, NTP and SMTP controls are on `Configuration -> Internet`; the remote tunnel is on `Configuration -> Remote access`; and the cellular page exposes SIM/APN configuration but no modem-disable switch. A strict offline deployment therefore needs physical or provider-level cellular isolation plus a direct cable, isolated VLAN, or router egress block.
+
+Documented the 200-sensor rate boundary. Ethernet reduces post-reception delivery latency but does not change sensor reporting or LoRa capacity. The current product specification publishes up to 30 messages per minute for a single Edge gateway. Ideal 200-node loads are 3.33/minute at 60 minutes, 13.33/minute at 15 minutes, 20/minute at 10 minutes, and 40/minute at 5 minutes. Fifteen minutes is the conservative initial hypothesis; the exact gateway license, slot scheduling, health/retry overhead, storage, and export behavior still require a physical load test.
+
+Inspected the physical Radio page and network bulk controls without transmitting. The gateway identifies four downlink categories: node time, reporting period, spreading factor, and model-specific sensor configuration. The network page can queue a reporting-period change for selected nodes and cancel pending reporting-period downlinks. Country/frequency and network-ID/password changes are gateway-local operations whose values must already match all sensors; they are not broadcast migration commands.
+
+No supported bulk `switch gateway` command was found. Embedded sensors use shared radio-network parameters rather than a unique gateway identity. A replacement gateway with the same region, frequency plan, network ID, and retained radio password can receive the nodes without reprogramming them, but the old gateway must be powered off or have downlinks disabled to avoid conflicts. A move to different radio credentials requires attended per-sensor provisioning. The gateway UI does not confirm RF delivery of new network credentials, sensor reboot, factory reset, firmware, node identity, or calibration operations.

@@ -1,6 +1,6 @@
 # TIL90 Reverse Engineering
 
-Last updated: 2026-07-22
+Last updated: 2026-07-24
 
 This repository documents a safety-first reverse engineering effort for a Worldsensing Loadsensing TIL90 sensor. Static analysis, direct Linux reads, monitoring, history, guarded configuration, gateway credentials, factory-reset recovery, and firmware 2.81 reinstallation are implemented. Calibration and node-ID writes remain blocked.
 
@@ -18,6 +18,7 @@ This repository documents a safety-first reverse engineering effort for a Worlds
 - A dedicated read-only deep-diagnostics tab classifies USB, power/MCU/UART, framing, bootloader hints, identity, configuration, measurement and history failures and exports JSON/CSV evidence; its complete physical run on node `101677` passed with zero persistent writes.
 - Bounded history returned 18 records, reboot reset uptime without changing configuration, and a temporary Z-axis disable produced an X/Y-only reading before verified restoration.
 - The physical node passed an exact-image firmware 2.81 reflash, factory reset, complete backup-driven restoration with new gateway credentials, reboot, and a final zero-difference configuration comparison.
+- A physical `LS-G6-KIO-GW-868` Edge gateway was identified over USB networking, authenticated through its local web interface, and shown to retain decoded TIL90 data. Authenticated HTTPS CSV download is physically proven; FTP/FTPS, MQTT, and Modbus TCP local exports are present but remain disabled pending an attended Ethernet-only acceptance test.
 
 Start with `docs/README.md`. The first hardware evidence is under `captures/reference_sessions/2026-07-15T103257Z/`; the post-gateway-configuration comparison is under `captures/reference_sessions/2026-07-15T161221Z-post-gateway-config/`.
 
@@ -71,6 +72,8 @@ Each enabled channel is encoded as a signed 21-bit angle scaled by `1/10000°` a
 | `docs/multi-sensor-wired.md` | Proposed ten-sensor wired Linux architecture and test plan | Design complete; implementation pending |
 | `docs/docker-deployment.md` | Container build, Linux USB hotplug, automatic acquisition, and operation | Physically validated on node 101677 |
 | `docs/node-identity.md` | Protocol node ID, factory identity, reset behavior, and safety boundary | Static-confirmed; write blocked |
+| `docs/gateway-local-export.md` | Physical Edge gateway, SSH boundary, local CSV proof, and cloud-independent Ethernet export design | Read-only validation complete; export activation pending |
+| `config/gateway-local.example.yaml` | Non-secret offline network, local export, and 200-sensor planning values | Template only; no gateway settings applied |
 | `docs/README.md` | Documentation index and evidence labels | Current navigation |
 | `docs/protocol.md` | Consolidated protocol summary | Current technical summary |
 | `analysis/protocol/*.csv` | Machine-readable protocol registries | Static-analysis output |
